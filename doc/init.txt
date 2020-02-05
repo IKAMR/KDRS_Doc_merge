@@ -1,0 +1,5 @@
+sourcePath = C:\developer\c#\kdrs_siard_tools\bin_files_text
+destPath = C:\developer\c#\kdrs_siard_tools\bin_files_text\merged
+csvFilePath = 
+actualTable = POSTKASSE
+tableXml = C:\developer\c#\kdrs_siard_tools\bin_files_text\tableTest.xml

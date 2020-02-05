@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Create time: 13.06.2019 16:15:30-->
+<!--Table repo/kdrs_siard_tools_v02 corresponds to actual table POSTKASSE-->
+<table xsi:schemaLocation="http://www.bar.admin.ch/xmlns/siard/2/table.xsd table.xsd" version="2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.bar.admin.ch/xmlns/siard/2/table.xsd">
+   <row>
+		<c1>test01</c1>
+		<c2>1</c2>
+		<c3>11</c3>
+		<c4>allerførste</c4>
+   </row>   
+   <row>
+		<c1>test02</c1>
+		<c2>1</c2>
+		<c3>10</c3>
+		<c4>nestførste</c4>
+   </row> 
+   <row>
+        <c1>test1</c1>
+        <c2>1</c2>
+        <c3>6</c3>
+        <c4 file="forste.bin" length="7" digestType="MD5" digest="14B6098DBCCFFE47300E2A33ADAA031D" />
+    </row>
+    <row>
+        <c1>test2</c1>
+        <c2>1</c2>
+        <c3>5</c3>
+        <c4 file="andre.bin" length="11" digestType="MD5" digest="1224F315EFA6F1D937C43A9BE554EA23" />
+    </row>
+	<row>
+        <c1>test2</c1>
+        <c2>2</c2>
+        <c3>5</c3>
+        <c4>femte</c4>
+    </row>
+    <row>
+        <c1>test2</c1>
+        <c2>3</c2>
+        <c3>6</c3>
+        <c4 file="tredje.bin" length="6" digestType="MD5" digest="F98F5777BD5B9AB0FF8C0C3A01189577" />
+    </row>
+	    <row>
+        <c1>test4</c1>
+        <c2>1</c2>
+        <c3>6</c3>
+        <c4 file="fjerde.bin" length="6" digestType="MD5" digest="F98F5777BD5B9AB0FF8C0C3A01189577" />
+    </row>
+	<row>
+        <c1>test6</c1>
+        <c2>1</c2>
+        <c3>6</c3>
+        <c4>sjette</c4>
+    </row>
+</table>

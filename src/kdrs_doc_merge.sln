@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kdrs_doc_merge", "kdrs_doc_merge.csproj", "{798A5F11-FA40-4F4B-97BC-40C6F09788A3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{798A5F11-FA40-4F4B-97BC-40C6F09788A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{798A5F11-FA40-4F4B-97BC-40C6F09788A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{798A5F11-FA40-4F4B-97BC-40C6F09788A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{798A5F11-FA40-4F4B-97BC-40C6F09788A3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C1C4C365-3A52-48FC-A17E-9ED294F74F50}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Create time: 25.06.2019 10:54:37-->
+<!--Table repo/kdrs_siard_tools_v02 corresponds to actual table POSTKASSE-->
+<table xsi:schemaLocation="http://www.bar.admin.ch/xmlns/siard/2/table.xsd table.xsd" version="2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.bar.admin.ch/xmlns/siard/2/table.xsd">
+    <row>
+        <c1>test01</c1>
+        <c2>1</c2>
+        <c3>11</c3>
+        <c4 file="merged/clobRec0_1.bin" length="11" digestType="MD5" digest="6698ACE018CFD4DA7CEBB458C1CAB39D" />
+    </row>
+    <row>
+        <c1>test02</c1>
+        <c2>1</c2>
+        <c3>10</c3>
+        <c4 file="merged/clobRec1_1.bin" length="10" digestType="MD5" digest="664ACAC3239E7D0F23D50315070B0BD3" />
+    </row>
+    <row>
+        <c1>test1</c1>
+        <c2>1</c2>
+        <c3>6</c3>
+        <c4 file="merged/forste_1.bin" length="6" digestType="MD5" digest="E8200586EC3033DB3F139BBB2B3A36F6" />
+    </row>
+    <row>
+        <c1>test2</c1>
+        <c2>1</c2>
+        <c3>16</c3>
+        <c4 file="merged/andre_3.bin" length="16" digestType="MD5" digest="0021E8BB7FE444D2A6B2E46685A3A333" />
+    </row>
+    <row>
+        <c1>test4</c1>
+        <c2>1</c2>
+        <c3>6</c3>
+        <c4 file="merged/fjerde_1.bin" length="6" digestType="MD5" digest="F98F5777BD5B9AB0FF8C0C3A01189577" />
+    </row>
+    <row>
+        <c1>test6</c1>
+        <c2>1</c2>
+        <c3>6</c3>
+        <c4 file="merged/clobRec2_1.bin" length="6" digestType="MD5" digest="639ACE8C4DE6D96D9B2877F3458B06F0" />
+    </row>
+    <!--Row count: 6-->
+    <!--Finshed at: 25.54.2019 10.54.37-->
+</table>
