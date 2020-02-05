@@ -21,6 +21,7 @@ namespace binFileMerger
         string initFolder;
         string actualTable;
         string tableXmlName;
+        string metadataXmlName;
 
         Boolean filesAdded = false;
         Boolean useSeg = true;
@@ -104,10 +105,10 @@ namespace binFileMerger
                     }
                     else
                     {
-                        //Console.WriteLine(clob.ClobString);
+                        Console.WriteLine(clob.ClobString);
                         log.Add(clob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + clobs.Count + ";" + "oldSeg" + ";" + clob.ClobString);
                        // textBox1.AppendText("Merging: " + clob.ClobString + " to: " + outFileName + "\n");
-                        using (var inputStream = File.OpenRead(Path.Combine(sourceFolder, clob.ClobString)))
+                        using (var inputStream = File.OpenRead(clob.ClobPath))
                         {
                             inputStream.CopyTo(outputStream);
                         }
@@ -289,8 +290,11 @@ namespace binFileMerger
         }
         //--------------------------------------------------------------------------------
         // Reads the chosen table.xml and put all info in a list of clobs.
-        private void ReadTableXml()
+        private void ReadTableXml(SiardTable lobTable)
         {
+            string contentPath = Directory.GetParent(Path.GetDirectoryName(lobTable.FilePath)).ToString();
+            string clobPath = Path.Combine(contentPath, lobTable.LobPath);
+
             XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
             xmlReaderSettings.IgnoreComments = false;
             XmlReader xmlReader = XmlReader.Create(tableXmlName, xmlReaderSettings);
@@ -323,7 +327,7 @@ namespace binFileMerger
                     long fileCount = getNodeInt(row, "descendant::ns:c2", nsmgr);
                     long clobSize = getNodeInt(row, "descendant::ns:c3", nsmgr);
                     string[] clobString = getAttributeText(row, "descendant::ns:c4", nsmgr);
-                    clobs.Add(new Clob(fileId, fileCount, clobSize, clobString[0], clobString[1]));
+                    clobs.Add(new Clob(fileId, fileCount, clobSize, clobString[0], clobString[1], Path.Combine(clobPath, clobString[0])));
                 }
                 rowCount++;
                 progress = rowCount * 100 / rowTotal;
@@ -404,14 +408,14 @@ namespace binFileMerger
         }
 
         //--------------------------------------------------------------------------------
-        // Starts file merging.
+        // Starts backgroundworker.
         private void button1_Click(object sender, EventArgs e)
         {
             if (filesAdded)
             {
                 backgroundWorker1 = new BackgroundWorker();
-                backgroundWorker1.DoWork += new DoWorkEventHandler(backgroundWorker1_DoWork);
-                backgroundWorker1.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker1_ProgressChanged);
+                backgroundWorker1.DoWork += backgroundWorker1_DoWork;
+                backgroundWorker1.ProgressChanged += backgroundWorker1_ProgressChanged;
                 backgroundWorker1.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
                 backgroundWorker1.WorkerReportsProgress = true;
                 backgroundWorker1.RunWorkerAsync();
@@ -419,24 +423,34 @@ namespace binFileMerger
             }
         }
         //--------------------------------------------------------------------------------
-
+        // Starts file transfering and file handling.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
+            backgroundWorker1.ReportProgress(0, "Copying header folder.");
+            DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(destFolder, "header"));
+            backgroundWorker1.ReportProgress(0, "header folder copy complete.");
 
-            /*List<SiardTable> siardListe = finder.TableXMLFinder(@"D:\arkiv-work\1529\1529_6_E-1529-2018-0007\content\sip\content\unziped\header\metadata.xml");
+
+            Console.WriteLine("Reading: " + metadataXmlName);
+            List<SiardTable> siardListe = finder.TableXMLFinder(metadataXmlName);
 
             Console.WriteLine(finder.SiardVersion);
-            tableXmlName = siardListe[0].FilePath + @"\" + siardListe[0].TableFileName + ".xml";*/
-            // Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.FilePath + @"\" + table.TableFileName +".xml");
+/*
+            foreach (SiardTable table in siardListe)
+            {
+                tableXmlName = table.FilePath + @"\" + table.TableFileName + ".xml";
+                 Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.FilePath + @"\" + table.TableFileName +".xml");
 
-            // RunTableMerge();
-             ReadTableXml();
+                // RunTableMerge();
+                ReadTableXml(table);
 
-            CreateTableXML();
+                CreateTableXML(table);
 
-            //textBox1.AppendText("Merging files");
+                //textBox1.AppendText("Merging files");
 
-            TableMerge();
+                TableMerge();
+
+            }*/
             //zipper.siardZip(destFolder, destFolder);
 
         }
@@ -501,6 +515,7 @@ namespace binFileMerger
 
             listBox1.Items.Add("Source folder: " + sourceFolder);
             listBox1.Items.Add("Destination folder: " + destFolder);
+            listBox1.Items.Add("metadata.xml: " + metadataXmlName);
 
             listBox1.Items.Add(GetTimeStamp());
 
@@ -520,6 +535,9 @@ namespace binFileMerger
             csvFileName = dic["csvFilePath"];
             actualTable = dic["actualTable"];
             tableXmlName = dic["tableXml"];
+            //metadataXmlName = dic["metadataXml"]; old
+
+            metadataXmlName = Path.Combine(sourceFolder, @"header\metadata.xml");
 
             Directory.CreateDirectory(destFolder);
 
@@ -528,7 +546,7 @@ namespace binFileMerger
 
         //--------------------------------------------------------------------------------
         // Creates table.xml file containing information about all the table files.
-        private void CreateTableXML()
+        private void CreateTableXML(SiardTable table)
         {
             string tableName = Path.GetFileName(Directory.GetParent(sourceFolder).ToString());
             string tableSchema = Path.GetFileName(Directory.GetParent(Directory.GetParent(sourceFolder).ToString()).ToString());
@@ -554,6 +572,41 @@ namespace binFileMerger
             xmlWriter.WriteAttributeString("xsi", "schemaLocation", "http://www.w3.org/2001/XMLSchema-instance", "http://www.bar.admin.ch/xmlns/siard/2/table.xsd table.xsd");
             xmlWriter.WriteAttributeString("version", "2.1");
 
+        }
+
+        //-------------------------------------------------------------------------------
+        private void DirectoryCopy(string sourceFolder, string targetPath)
+        {
+            DirectoryInfo dir = new DirectoryInfo(sourceFolder);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException("Source folder does not exist or could not be found: " + sourceFolder);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            DirectoryInfo targetDir = new DirectoryInfo(targetPath);
+            if (dir.Exists)
+            {
+                // throw new Exception("Target folder already exist: " + targetPath);
+            }
+            Console.WriteLine("Creating:" + targetPath);
+
+            Directory.CreateDirectory(targetPath);
+
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string tempPath = Path.Combine(targetPath, file.Name);
+                file.CopyTo(tempPath, false);
+            }
+
+            foreach (DirectoryInfo subdir in dirs)
+            {
+                string tempPath = Path.Combine(targetPath, subdir.Name);
+                DirectoryCopy(subdir.FullName, tempPath);
+            }
         }
 
         //--------------------------------------------------------------------------------
@@ -607,7 +660,6 @@ namespace binFileMerger
                 }
             }
         }
-
         //--------------------------------------------------------------------------------
         // Returns text in the queried node.
         private string getNodeText(XmlNode table, string query, XmlNamespaceManager nsmgr)
@@ -623,7 +675,6 @@ namespace binFileMerger
             }
             return varText;
         }
-
         //--------------------------------------------------------------------------------
         // Returns number in the queried node.
         private long getNodeInt(XmlNode table, string query, XmlNamespaceManager nsmgr)
@@ -665,7 +716,6 @@ namespace binFileMerger
         {
             return value.ToString("dd.mm.yyyy HH.mm.ss");
         }
-
         //--------------------------------------------------------------------------------
         // Timestamp of desired format.
         private string GetTimeStamp()
@@ -690,14 +740,16 @@ namespace binFileMerger
         public long ClobSize { get; set; }
         public string ClobString { get; set; }
         public string ClobType { get; set; }
+        public string ClobPath { get; set; }
 
-        public Clob(string fileId, long fileCount, long clobSize, string clobString, string clobtype)
+        public Clob(string fileId, long fileCount, long clobSize, string clobString, string clobtype, string clobPath)
         {
             FileId = fileId;
             FileCount = fileCount;
             ClobSize = clobSize;
             ClobString = clobString;
             ClobType = clobtype;
+            ClobPath = clobPath;
         }
     }
 }

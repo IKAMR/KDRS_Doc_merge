@@ -1,5 +1,6 @@
-sourcePath = C:\developer\c#\kdrs_siard_tools\bin_files_text
-destPath = C:\developer\c#\kdrs_siard_tools\bin_files_text\merged
+sourcePath = G:\arkiv-work\1529\1529_006_1529-2018-0007_debug\content\scfc_psql-to-siard_h1529esa01a\h1529esa01a_int
+destPath = G:\arkiv-work\1529\1529_006_1529-2018-0007_debug\content\scfc_psql-to-siard_h1529esa01a\h1529esa01a_int_merged
 csvFilePath = 
 actualTable = POSTKASSE
 tableXml = C:\developer\c#\kdrs_siard_tools\bin_files_text\tableTest.xml
+metadataXml = G:\arkiv-work\1529\1529_006_1529-2018-0007_debug\content\scfc_psql-to-siard_h1529esa01a\h1529esa01a_int\header\metadata.xml

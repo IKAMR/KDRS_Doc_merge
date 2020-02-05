@@ -22,6 +22,9 @@ namespace binFileMerger
             List<SiardTable> tableList = new List<SiardTable>();
 
             XmlDocument metadataXml = new XmlDocument();
+
+            if (!File.Exists(metaFilePath))
+                Console.WriteLine("Cant find " + metaFilePath);
             metadataXml.Load(metaFilePath);
 
             var nsmgr = new XmlNamespaceManager(metadataXml.NameTable);
@@ -32,7 +35,9 @@ namespace binFileMerger
 
             XmlNode root = metadataXml.DocumentElement;
 
-            XmlNodeList liste = root.SelectNodes("descendant::ns:table[ns:columns/ns:column/ns:name='FIL']", nsmgr);
+            XmlNodeList liste = root.SelectNodes("descendant::ns:table[ns:columns/ns:column/ns:name='fil']", nsmgr);
+
+            Console.WriteLine("Node list length: " + liste.Count);
 
             DirectoryInfo metaDirInfo = new DirectoryInfo(metaFilePath);
             String metaGrandParent = metaDirInfo.Parent.Parent.FullName;
@@ -41,6 +46,7 @@ namespace binFileMerger
 
             foreach (XmlNode node in liste)
             {
+                Console.WriteLine("Reading node");
                 string lobpath = node.SelectSingleNode("ns:columns/ns:column/ns:lobFolder", nsmgr).InnerText.ToString();
                 string schema = node.ParentNode.ParentNode["folder"].InnerText.ToString();
                 string tableName = Path.GetFileName(Directory.GetParent(lobpath).ToString());
