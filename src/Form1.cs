@@ -110,7 +110,7 @@ namespace binFileMerger
                 {
                     if (prevClobType == "clob" && clob.FileCount == 1)
                     {
-                        string clobFileName = "clobRec" + clobCount + ".bin";
+                        string clobFileName = Path.Combine("seg", "clobRec" + clobCount + ".bin");
                         newFileName = FileNameChanger(clob.LobFolder, clobFileName, fileCount);
                         BinMergeClob(mergeClobs, newFileName);
                         clobCount++;
@@ -145,7 +145,7 @@ namespace binFileMerger
                 {
                     if (clob.ClobType == "clob" && clob.FileCount == 1)
                     {
-                        string clobFileName = "clobRec" + clobCount + ".bin";
+                        string clobFileName = Path.Combine("seg", "clobRec" + clobCount + ".bin");
                         newFileName = FileNameChanger(clob.LobFolder, clobFileName, fileCount);
                         BinMergeClob(mergeClobs, newFileName);
                         clobCount++;
@@ -277,13 +277,15 @@ namespace binFileMerger
                 if (fileCounter == 1)
                     return Path.Combine(folder, String.Concat(fName, fExt));
 
-                return Path.Combine(folder, String.Concat(fName, '_', fileCounter, fExt));
+               // return Path.Combine(folder, String.Concat(fName, '_', fileCounter, fExt));
+                return Path.Combine(folder, String.Concat(fName, fExt));
             }
             else
             {
                 if (fileCounter == 1)
                     return Path.Combine(folder, newSegFolder, String.Concat(fName, fExt));
-                return Path.Combine(folder, newSegFolder, String.Concat(fName, '_', fileCounter, fExt));
+                //return Path.Combine(folder, newSegFolder, String.Concat(fName, '_', fileCounter, fExt));
+                return Path.Combine(folder, newSegFolder, String.Concat(fName, fExt));
             }
         }
         #endregion
