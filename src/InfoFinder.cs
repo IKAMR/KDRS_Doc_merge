@@ -17,9 +17,9 @@ namespace binFileMerger
 
         public string SiardVersion { get => siardVersion; set => siardVersion = value; }
 
-        public List<SiardTable> TableXMLFinder(string metaFilePath)
+        public List<SiardTableXml> TableXMLFinder(string metaFilePath)
         {
-            List<SiardTable> tableList = new List<SiardTable>();
+            List<SiardTableXml> tableList = new List<SiardTableXml>();
 
             XmlDocument metadataXml = new XmlDocument();
 
@@ -51,7 +51,7 @@ namespace binFileMerger
                 string schema = node.ParentNode.ParentNode["folder"].InnerText.ToString();
                 string tableName = Path.GetFileName(Directory.GetParent(lobpath).ToString());
 
-                tableList.Add(new SiardTable(tableName, lobpath, Path.Combine(metaGrandParent,"content", schema, tableName)));
+                tableList.Add(new SiardTableXml(tableName, lobpath, Path.Combine(metaGrandParent,"content", schema, tableName)));
             }
 
             return tableList;
@@ -68,9 +68,9 @@ namespace binFileMerger
 
     }
 
-    public class SiardTable
+    public class SiardTableXml
     {
-        public SiardTable(string tableFileName, string lobPath, string filePath)
+        public SiardTableXml(string tableFileName, string lobPath, string filePath)
         {
             TableFileName = tableFileName;
             LobPath = lobPath;

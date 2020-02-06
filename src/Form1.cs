@@ -290,7 +290,7 @@ namespace binFileMerger
         }
         //--------------------------------------------------------------------------------
         // Reads the chosen table.xml and put all info in a list of clobs.
-        private void ReadTableXml(SiardTable lobTable)
+        private void ReadTableXml(SiardTableXml lobTable)
         {
             string contentPath = Directory.GetParent(Path.GetDirectoryName(lobTable.FilePath)).ToString();
             string clobPath = Path.Combine(contentPath, lobTable.LobPath);
@@ -432,7 +432,7 @@ namespace binFileMerger
 
 
             Console.WriteLine("Reading: " + metadataXmlName);
-            List<SiardTable> siardListe = finder.TableXMLFinder(metadataXmlName);
+            List<SiardTableXml> siardListe = finder.TableXMLFinder(metadataXmlName);
 
             Console.WriteLine(finder.SiardVersion);
 /*
@@ -454,7 +454,7 @@ namespace binFileMerger
             //zipper.siardZip(destFolder, destFolder);
 
         }
-
+        //--------------------------------------------------------------------------------
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             progressBar1.Value = e.ProgressPercentage;
@@ -462,7 +462,7 @@ namespace binFileMerger
             if(e.UserState != null)
                 textBox1.AppendText(e.UserState.ToString() + "\r\n");
         }
-
+        //--------------------------------------------------------------------------------
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             textBox1.AppendText("\r\nJob complete");
@@ -483,14 +483,6 @@ namespace binFileMerger
             clobs.Clear();
 
             xmlWriter.Close();
-        }
-        #endregion
-
-        //--------------------------------------------------------------------------------
-        #region Form_Load
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
         #endregion
 
@@ -546,7 +538,7 @@ namespace binFileMerger
 
         //--------------------------------------------------------------------------------
         // Creates table.xml file containing information about all the table files.
-        private void CreateTableXML(SiardTable table)
+        private void CreateTableXML(SiardTableXml table)
         {
             string tableName = Path.GetFileName(Directory.GetParent(sourceFolder).ToString());
             string tableSchema = Path.GetFileName(Directory.GetParent(Directory.GetParent(sourceFolder).ToString()).ToString());
