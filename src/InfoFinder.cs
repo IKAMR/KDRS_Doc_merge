@@ -53,13 +53,13 @@ namespace binFileMerger
 
             foreach (XmlNode table in tables)
             {
-                Console.WriteLine("Reading node");
+               // Console.WriteLine("Reading node");
 
                 string lobpath = getNodeText(table, "ns:columns/ns:column/ns:lobFolder", nsmgr);
                 string schema = table.ParentNode.ParentNode["folder"].InnerText.ToString();
                 string tableName = getNodeText(table, "ns:folder", nsmgr);
 
-                tableList.Add(new SiardTableXml(tableName, lobpath, Path.Combine(lobFolder, schema, tableName), Path.Combine(metaGrandParent, lobFolder, schema, tableName)));
+                tableList.Add(new SiardTableXml(tableName, lobpath, schema, Path.Combine(metaGrandParent, lobFolder, schema, tableName)));
 
             }
             /*
@@ -107,17 +107,17 @@ namespace binFileMerger
 
     public class SiardTableXml
     {
-        public SiardTableXml(string tableFileName, string lobPath, string tableFolder, string tableFilePath)
+        public SiardTableXml(string tableFileName, string lobPath, string tableSchema, string tableFilePath)
         {
             TableFileName = tableFileName;
             LobPath = lobPath;
-            TableFolder = tableFolder;
+            TableSchema = tableSchema;
             this.TableFilePath = tableFilePath;
         }
 
         public string TableFileName { get; set;}
         public string LobPath { get; set; }
-        public string TableFolder { get; set; }
+        public string TableSchema { get; set; }
         public string TableFilePath { get; set; }
     }
 

@@ -43,49 +43,6 @@ namespace binFileMerger
         }
 
         //--------------------------------------------------------------------------------
-        // Appends content of inFileName to the end of outFileName.
-        #region BinMerge
-        private void BinMerge(string inFileName, string outFileName)
-        {
-            textBox1.AppendText("Merging: " + inFileName + " to: " + outFileName + "\n");
-
-            using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(outFileName)))
-            {
-                writer.Seek(0, SeekOrigin.End);
-
-                using (BinaryReader reader = new BinaryReader(File.OpenRead(inFileName)))
-                {
-                    byte[] buffer = new byte[1024];
-
-                    while (reader.BaseStream.Position < reader.BaseStream.Length)
-                    {
-                        int count = reader.Read(buffer, 0, buffer.Length);
-                        writer.Write(buffer, 0, count);
-                    }
-                }
-            }
-        }
-        #endregion
-        //--------------------------------------------------------------------------------
-        #region BinMerge2
-        private void BinMerge2(List<string> files, string outFileName)
-        {
-            using (var outputStream = File.Create(outFileName))
-            {
-                foreach (var file in files)
-                {
-                    //   Console.WriteLine(file);
-                    log.Add(outFileName + ";" + "newSeg" + ";" + "droid" + ";" + files.Count + ";" + "oldSeg" + ";" + file);
-                    textBox1.AppendText("Merging2: " + file + " to: " + outFileName + "\n");
-                    using (var inputStream = File.OpenRead(file))
-                    {
-                        inputStream.CopyTo(outputStream);
-                    }
-                }
-            }
-        }
-        #endregion
-        //--------------------------------------------------------------------------------
         // Merges contents of the input list to a file with name 'outFileName'.
         private void BinMergeClob(List<Clob> clobsToMerge, string outFileName)
         {
@@ -116,73 +73,7 @@ namespace binFileMerger
                 }
             }
         }
-        //--------------------------------------------------------------------------------
-        // Reads the .csv file line by line and merges .bin files with the same file-ID.
-        #region RunTableMerge
-        private void RunTableMerge()
-        {
-            string currentLine;
-            string fileID;
-            string prevFileID;
-            int fileCount;
 
-            string newFileName;
-
-            using (StreamReader sr = new StreamReader(csvFileName))
-            {
-                fileCount = 0;
-
-                currentLine = sr.ReadLine();
-                //  Console.WriteLine(currentLine);
-
-                string[] parts = currentLine.Split(';');
-
-                prevFileID = parts[0];
-                files.Add(Path.Combine(sourceFolder, parts[2]));
-                fileCount++;
-
-                while ((currentLine = sr.ReadLine()) != null)
-                {
-                    parts = currentLine.Split(';');
-                    fileID = parts[0];
-
-                    //Console.WriteLine("FileID: " + fileID + ", file: " + parts[2]);
-
-                    // If a new fileId is encountered -> merge collection of files with same fileID.
-                    if (fileID != prevFileID)
-                    {
-                        newFileName = FileNameChanger(destFolder, files[0], fileCount);
-
-                        BinMerge2(files, newFileName);
-
-                        AddXMLFileInfo(prevFileID, newFileName);
-
-                        fileCount = 0;
-                        prevFileID = fileID;
-                        files.Clear();
-                    }
-
-                    files.Add(Path.Combine(sourceFolder, parts[2]));
-                    fileCount++;
-                }
-
-                fileID = parts[0];
-                newFileName = FileNameChanger(destFolder, files[0], fileCount);
-                //textBox1.AppendText("Last fileId \n");
-
-                BinMerge2(files, newFileName);
-
-                AddXMLFileInfo(fileID, newFileName);
-
-                xmlWriter.WriteEndDocument();
-
-                xmlWriter.Close();
-
-                MakeLogFile();
-                textBox1.AppendText("Merging complete! \n");
-            }
-        }
-        #endregion
         //--------------------------------------------------------------------------------
         // Traverses the list of clobs from the table.xml file and merges the .bin files and text strings with the same fileID.
         private void TableMerge()
@@ -221,7 +112,7 @@ namespace binFileMerger
                     if (prevClobType == "clob" && clob.FileCount == 1)
                     {
                         string clobFileName = "clobRec" + clobCount + ".bin";
-                        newFileName = FileNameChanger(destFolder, clobFileName, fileCount);
+                        newFileName = FileNameChanger(clob.LobFolder, clobFileName, fileCount);
                         BinMergeClob(mergeClobs, newFileName);
                         clobCount++;
 
@@ -230,7 +121,7 @@ namespace binFileMerger
                     }
                     else
                     {
-                        newFileName = FileNameChanger(destFolder, mergeClobs[0].ClobString, fileCount);
+                        newFileName = FileNameChanger(clob.LobFolder, mergeClobs[0].ClobString, fileCount);
                         BinMergeClob(mergeClobs, newFileName);
 
                         AddXMLFileInfo(prevFileID, newFileName);
@@ -256,7 +147,7 @@ namespace binFileMerger
                     if (clob.ClobType == "clob" && clob.FileCount == 1)
                     {
                         string clobFileName = "clobRec" + clobCount + ".bin";
-                        newFileName = FileNameChanger(destFolder, clobFileName, fileCount);
+                        newFileName = FileNameChanger(clob.LobFolder, clobFileName, fileCount);
                         BinMergeClob(mergeClobs, newFileName);
                         clobCount++;
 
@@ -265,7 +156,7 @@ namespace binFileMerger
                     }
                     else
                     {
-                        newFileName = FileNameChanger(destFolder, mergeClobs[0].ClobString, fileCount);
+                        newFileName = FileNameChanger(clob.LobFolder, mergeClobs[0].ClobString, fileCount);
                         BinMergeClob(mergeClobs, newFileName);
 
                         AddXMLFileInfo(fileID, newFileName);
@@ -293,11 +184,14 @@ namespace binFileMerger
             string contentPath = Directory.GetParent(Path.GetDirectoryName(lobTable.TableFilePath)).ToString();
             string clobPath = Path.Combine(contentPath, lobTable.LobPath);
 
+            clobs.Clear();
+
             XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
             xmlReaderSettings.IgnoreComments = false;
             XmlReader xmlReader = XmlReader.Create(tableXmlName, xmlReaderSettings);
 
             Console.WriteLine("xml file: " + tableXmlName);
+            Console.WriteLine("clob path: " + clobPath);
 
             XmlDocument tableXml = new XmlDocument();
             tableXml.Load(xmlReader);
@@ -325,7 +219,9 @@ namespace binFileMerger
                     long fileCount = getNodeInt(row, "descendant::ns:c2", nsmgr);
                     long clobSize = getNodeInt(row, "descendant::ns:c3", nsmgr);
                     string[] clobString = getAttributeText(row, "descendant::ns:c4", nsmgr);
-                    clobs.Add(new Clob(fileId, fileCount, clobSize, clobString[0], clobString[1], Path.Combine(clobPath, clobString[0])));
+
+                    string lobPath = Path.Combine(destFolder, finder.lobFolder, lobTable.LobPath);
+                    clobs.Add(new Clob(fileId, fileCount, clobSize, clobString[0], clobString[1], Path.Combine(clobPath, clobString[0]), lobPath));
                 }
                 rowCount++;
                 progress = rowCount * 100 / rowTotal;
@@ -357,20 +253,10 @@ namespace binFileMerger
                }
               */
 
-
             //Console.WriteLine("Comment: " + comments[1].Value);
 
-            /*if (InvokeRequired)
-            {
-                this.Invoke(new MethodInvoker(delegate
-                {
-                }));
-                return;
-            }*/
             backgroundWorker1.ReportProgress(progress, "Table xml file read");
-
         }
-
         //--------------------------------------------------------------------------------
         // Creates a new filename which includes the number of files the new file consists of.
         #region FileNameChanger
@@ -389,10 +275,15 @@ namespace binFileMerger
 
             if (!useSeg)
             {
+                if (fileCounter == 1)
+                    return Path.Combine(folder, String.Concat(fName, fExt));
+
                 return Path.Combine(folder, String.Concat(fName, '_', fileCounter, fExt));
             }
             else
             {
+                if (fileCounter == 1)
+                    return Path.Combine(folder, newSegFolder, String.Concat(fName, fExt));
                 return Path.Combine(folder, newSegFolder, String.Concat(fName, '_', fileCounter, fExt));
             }
         }
@@ -404,7 +295,6 @@ namespace binFileMerger
         {
             File.WriteAllLines(Path.Combine(Directory.GetParent(destFolder).ToString(), "filelist_" + GetTimeStamp() + ".csv"), log);
         }
-
         //--------------------------------------------------------------------------------
         // Starts backgroundworker.
         private void button1_Click(object sender, EventArgs e)
@@ -440,14 +330,28 @@ namespace binFileMerger
             foreach (SiardTableXml table in siardListe)
             {
                 tableXmlName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
-                Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableFolder +" " + table.TableFilePath);
 
                 if (String.IsNullOrEmpty(table.LobPath))
                 {
-                    DirectoryCopy(table.TableFilePath, Path.Combine(destFolder, table.TableFolder));
+                    DirectoryCopy(table.TableFilePath, Path.Combine(destFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
                 }else
                 {
+                    Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
+
+                    Directory.CreateDirectory(Path.Combine(destFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
+
                     ReadTableXml(table);
+                    CreateTableXML(table);
+
+                    backgroundWorker1.ReportProgress(0, "Merging files");
+
+                    TableMerge();
+
+
+                    string tableXSDFilePath = Path.Combine(table.TableFilePath, table.TableFileName + ".xsd");
+                    string newXsdFilePath = Path.Combine(destFolder, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
+
+                    File.Copy(tableXSDFilePath, newXsdFilePath);
                 }
                 // RunTableMerge();
                 //ReadTableXml(table);
@@ -548,8 +452,7 @@ namespace binFileMerger
         // Creates table.xml file containing information about all the table files.
         private void CreateTableXML(SiardTableXml table)
         {
-            string tableName = Path.GetFileName(Directory.GetParent(sourceFolder).ToString());
-            string tableSchema = Path.GetFileName(Directory.GetParent(Directory.GetParent(sourceFolder).ToString()).ToString());
+            //string tableName = Path.GetFileName(Directory.GetParent(sourceFolder).ToString());
 
             XmlWriterSettings xmlWriterSettings = new XmlWriterSettings()
             {
@@ -557,7 +460,7 @@ namespace binFileMerger
                 IndentChars = "    "
             };
 
-            xmlWriter = XmlWriter.Create(Path.Combine(Directory.GetParent(destFolder).ToString(), tableName + "merged_test.xml"), xmlWriterSettings);
+            xmlWriter = XmlWriter.Create(Path.Combine(destFolder, finder.LobFolder, table.TableSchema, table.TableFileName, table.TableFileName + "_merged.xml"), xmlWriterSettings);
 
             xmlWriter.WriteStartDocument();
 
@@ -741,8 +644,9 @@ namespace binFileMerger
         public string ClobString { get; set; }
         public string ClobType { get; set; }
         public string ClobPath { get; set; }
+        public string LobFolder { get; set; }
 
-        public Clob(string fileId, long fileCount, long clobSize, string clobString, string clobtype, string clobPath)
+        public Clob(string fileId, long fileCount, long clobSize, string clobString, string clobtype, string clobPath, string lobFolder)
         {
             FileId = fileId;
             FileCount = fileCount;
@@ -750,6 +654,7 @@ namespace binFileMerger
             ClobString = clobString;
             ClobType = clobtype;
             ClobPath = clobPath;
+            LobFolder = lobFolder;
         }
     }
 }
