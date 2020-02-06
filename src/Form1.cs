@@ -16,11 +16,11 @@ namespace binFileMerger
     {
 
         string csvFileName;
-        string destFolder;
+        string targetFolder;
         string sourceFolder;
         string initFolder;
-        string actualTable;
-        string tableXmlName;
+        string zip64jar;
+        string inputFileName;
         string metadataXmlName;
 
         Boolean filesAdded = false;
@@ -73,7 +73,6 @@ namespace binFileMerger
                 }
             }
         }
-
         //--------------------------------------------------------------------------------
         // Traverses the list of clobs from the table.xml file and merges the .bin files and text strings with the same fileID.
         private void TableMerge()
@@ -188,9 +187,9 @@ namespace binFileMerger
 
             XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
             xmlReaderSettings.IgnoreComments = false;
-            XmlReader xmlReader = XmlReader.Create(tableXmlName, xmlReaderSettings);
+            XmlReader xmlReader = XmlReader.Create(inputFileName, xmlReaderSettings);
 
-            Console.WriteLine("xml file: " + tableXmlName);
+            Console.WriteLine("xml file: " + inputFileName);
             Console.WriteLine("clob path: " + clobPath);
 
             XmlDocument tableXml = new XmlDocument();
@@ -220,7 +219,7 @@ namespace binFileMerger
                     long clobSize = getNodeInt(row, "descendant::ns:c3", nsmgr);
                     string[] clobString = getAttributeText(row, "descendant::ns:c4", nsmgr);
 
-                    string lobPath = Path.Combine(destFolder, finder.lobFolder, lobTable.LobPath);
+                    string lobPath = Path.Combine(targetFolder, finder.lobFolder, lobTable.LobPath);
                     clobs.Add(new Clob(fileId, fileCount, clobSize, clobString[0], clobString[1], Path.Combine(clobPath, clobString[0]), lobPath));
                 }
                 rowCount++;
@@ -293,14 +292,36 @@ namespace binFileMerger
         // Prints the log list to a .csv file.
         public void MakeLogFile()
         {
-            File.WriteAllLines(Path.Combine(Directory.GetParent(destFolder).ToString(), "filelist_" + GetTimeStamp() + ".csv"), log);
+            File.WriteAllLines(Path.Combine(Directory.GetParent(targetFolder).ToString(), "filelist_" + GetTimeStamp() + ".csv"), log);
         }
         //--------------------------------------------------------------------------------
         // Starts backgroundworker.
-        private void button1_Click(object sender, EventArgs e)
+        private void btnRunMerge_Click(object sender, EventArgs e)
         {
+
+            //targetFolder = txtTargetFolder.Text;
+
+            //inputFileName = txtInputFile.Text;
+            /*
+            string inputExt = Path.GetExtension(inputFileName);
+
+            if (inputExt.Equals("siard"))
+            {
+                filesAdded = true;
+            }
+            else if (inputFileName.Equals("metadata.xml"))
+            {
+                filesAdded = true;
+
+            }
+            else
+                textBox1.Text = "Please choose a valid file type! (.siard or metadata.xml)";
+              */ 
+
             if (filesAdded)
             {
+                Directory.CreateDirectory(targetFolder);
+
                 backgroundWorker1 = new BackgroundWorker();
                 backgroundWorker1.DoWork += backgroundWorker1_DoWork;
                 backgroundWorker1.ProgressChanged += backgroundWorker1_ProgressChanged;
@@ -315,30 +336,30 @@ namespace binFileMerger
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             backgroundWorker1.ReportProgress(0, "Copying header folder.");
-            DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(destFolder, "header"));
+            DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(targetFolder, "header"));
             backgroundWorker1.ReportProgress(0, "header folder copy complete.");
 
             Console.WriteLine("Reading: " + metadataXmlName);
             List<SiardTableXml> siardListe = finder.TableXMLFinder(metadataXmlName);
 
             backgroundWorker1.ReportProgress(0, "Creating lobFolder.");
-            Directory.CreateDirectory(Path.Combine(destFolder, finder.LobFolder));
+            Directory.CreateDirectory(Path.Combine(targetFolder, finder.LobFolder));
 
             Console.WriteLine(finder.SiardVersion);
             Console.WriteLine(finder.LobFolder);
 
             foreach (SiardTableXml table in siardListe)
             {
-                tableXmlName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
+                inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
 
                 if (String.IsNullOrEmpty(table.LobPath))
                 {
-                    DirectoryCopy(table.TableFilePath, Path.Combine(destFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
+                    DirectoryCopy(table.TableFilePath, Path.Combine(targetFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
                 }else
                 {
                     Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
 
-                    Directory.CreateDirectory(Path.Combine(destFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
+                    Directory.CreateDirectory(Path.Combine(targetFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
 
                     ReadTableXml(table);
                     CreateTableXML(table);
@@ -349,7 +370,7 @@ namespace binFileMerger
 
 
                     string tableXSDFilePath = Path.Combine(table.TableFilePath, table.TableFileName + ".xsd");
-                    string newXsdFilePath = Path.Combine(destFolder, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
+                    string newXsdFilePath = Path.Combine(targetFolder, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
 
                     File.Copy(tableXSDFilePath, newXsdFilePath);
                 }
@@ -363,7 +384,9 @@ namespace binFileMerger
                 // TableMerge();
 
             }
-            //zipper.siardZip(destFolder, destFolder);
+
+            if (chkBxMakeSiard.Checked)
+                zipper.SiardZip(targetFolder, targetFolder, zip64jar);
 
         }
         //--------------------------------------------------------------------------------
@@ -389,7 +412,7 @@ namespace binFileMerger
             textBox1.Clear();
 
             sourceFolder = null;
-            destFolder = null;
+            targetFolder = null;
             csvFileName = null;
 
             clobs.Clear();
@@ -418,7 +441,7 @@ namespace binFileMerger
             listBox1.Items.Add("csv file: " + csvFileName);
 
             listBox1.Items.Add("Source folder: " + sourceFolder);
-            listBox1.Items.Add("Destination folder: " + destFolder);
+            listBox1.Items.Add("Destination folder: " + targetFolder);
             listBox1.Items.Add("metadata.xml: " + metadataXmlName);
 
             listBox1.Items.Add(GetTimeStamp());
@@ -435,15 +458,13 @@ namespace binFileMerger
                 .ToDictionary(s => s[0].Trim(), s => s[1].Trim());
 
             sourceFolder = dic["sourcePath"];
-            destFolder = dic["destPath"];
-            csvFileName = dic["csvFilePath"];
-            actualTable = dic["actualTable"];
-            tableXmlName = dic["tableXml"];
-            //metadataXmlName = dic["metadataXml"]; old
+            targetFolder = dic["destPath"];
+            zip64jar = dic["zip64jar"];
+
 
             metadataXmlName = Path.Combine(sourceFolder, @"header\metadata.xml");
 
-            Directory.CreateDirectory(destFolder);
+            Directory.CreateDirectory(targetFolder);
 
             filesAdded = true;
         }
@@ -460,7 +481,7 @@ namespace binFileMerger
                 IndentChars = "    "
             };
 
-            xmlWriter = XmlWriter.Create(Path.Combine(destFolder, finder.LobFolder, table.TableSchema, table.TableFileName, table.TableFileName + "_merged.xml"), xmlWriterSettings);
+            xmlWriter = XmlWriter.Create(Path.Combine(targetFolder, finder.LobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xml"), xmlWriterSettings);
 
             xmlWriter.WriteStartDocument();
 
@@ -624,6 +645,20 @@ namespace binFileMerger
         private string GetTimeStamp()
         {
             return DateTime.Now.ToString("yyyy-MM-dd_HHmm");
+        }
+        //--------------------------------------------------------------------------------
+        private void btnInputFile_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = openFileDialog1.ShowDialog();
+            if (dr == DialogResult.OK)
+                txtInputFile.Text = openFileDialog1.FileName;
+        }
+        //--------------------------------------------------------------------------------
+        private void btnTargetFolder_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = folderBrowserDialog1.ShowDialog();
+            if (dr == DialogResult.OK)
+                txtTargetFolder.Text = folderBrowserDialog1.SelectedPath;
         }
     }
 

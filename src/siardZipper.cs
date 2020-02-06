@@ -9,13 +9,13 @@ namespace binFileMerger
 {
     class SiardZipper
     {
-        public void SiardZip(string folder, string targetName)
+        public void SiardZip(string folder, string targetName, string jarPath)
         {
-            string javaPath = @"C:\prog\zip64_v2.1.58\zip64-2.1.58\lib\zip64.jar";
+            //string javaPath = @"C:\prog\zip64-2.1.58\zip64\lib\zip64.jar";
             string source = "-d=" + folder;
             string target = targetName + ".siard";
 
-            string javaCommand = " -jar " + javaPath + " n " + source + " " + target;
+            string javaCommand = " -jar " + jarPath + " n " + source + " " + target;
 
             Process proc = new Process();
 
