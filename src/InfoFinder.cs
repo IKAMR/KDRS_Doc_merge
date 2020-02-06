@@ -13,9 +13,12 @@ namespace binFileMerger
         
 
         SiardZipper unzipper = new SiardZipper();
-        string siardVersion;
+        public string siardVersion;
+        public string lobFolder;
 
         public string SiardVersion { get => siardVersion; set => siardVersion = value; }
+        public string LobFolder { get => lobFolder; set => lobFolder = value; }
+        //--------------------------------------------------------------------------------
 
         public List<SiardTableXml> TableXMLFinder(string metaFilePath)
         {
@@ -35,15 +38,31 @@ namespace binFileMerger
 
             XmlNode root = metadataXml.DocumentElement;
 
+            XmlNodeList tables = root.SelectNodes("descendant::ns:table", nsmgr);
+
             XmlNodeList liste = root.SelectNodes("descendant::ns:table[ns:columns/ns:column/ns:name='fil']", nsmgr);
 
-            Console.WriteLine("Node list length: " + liste.Count);
+            Console.WriteLine("Node list length: " + tables.Count);
+
+            lobFolder = getNodeText(root, "descendant::ns:lobFolder", nsmgr);
 
             DirectoryInfo metaDirInfo = new DirectoryInfo(metaFilePath);
             String metaGrandParent = metaDirInfo.Parent.Parent.FullName;
 
             siardVersion = root.Attributes["version"].Value;
 
+            foreach (XmlNode table in tables)
+            {
+                Console.WriteLine("Reading node");
+
+                string lobpath = getNodeText(table, "ns:columns/ns:column/ns:lobFolder", nsmgr);
+                string schema = table.ParentNode.ParentNode["folder"].InnerText.ToString();
+                string tableName = getNodeText(table, "ns:folder", nsmgr);
+
+                tableList.Add(new SiardTableXml(tableName, lobpath, Path.Combine(lobFolder, schema, tableName), Path.Combine(metaGrandParent, lobFolder, schema, tableName)));
+
+            }
+            /*
             foreach (XmlNode node in liste)
             {
                 Console.WriteLine("Reading node");
@@ -51,11 +70,12 @@ namespace binFileMerger
                 string schema = node.ParentNode.ParentNode["folder"].InnerText.ToString();
                 string tableName = Path.GetFileName(Directory.GetParent(lobpath).ToString());
 
-                tableList.Add(new SiardTableXml(tableName, lobpath, Path.Combine(metaGrandParent,"content", schema, tableName)));
+                tableList.Add(new SiardTableXml(tableName, lobpath, Path.Combine(metaGrandParent, lobFolder, schema, tableName)));
             }
-
+            */
             return tableList;
         }
+        //--------------------------------------------------------------------------------
 
         private string MetaFileFinder(string siardFile)
         {
@@ -65,21 +85,40 @@ namespace binFileMerger
 
             return unZipFolder + @"\header\metadata.xml";
         }
-
+        //--------------------------------------------------------------------------------
+        // Returns text in the queried node.
+        private string getNodeText(XmlNode table, string query, XmlNamespaceManager nsmgr)
+        {
+            string varText = "";
+            if (table != null)
+            {
+                XmlNode node = table.SelectSingleNode(query, nsmgr);
+                if (node != null)
+                {
+                    varText = node.InnerText;
+                }
+            }
+            return varText;
+        }
     }
+
+
+    //--------------------------------------------------------------------------------
 
     public class SiardTableXml
     {
-        public SiardTableXml(string tableFileName, string lobPath, string filePath)
+        public SiardTableXml(string tableFileName, string lobPath, string tableFolder, string tableFilePath)
         {
             TableFileName = tableFileName;
             LobPath = lobPath;
-            this.FilePath = filePath;
+            TableFolder = tableFolder;
+            this.TableFilePath = tableFilePath;
         }
 
         public string TableFileName { get; set;}
         public string LobPath { get; set; }
-        public string FilePath { get; set; }
+        public string TableFolder { get; set; }
+        public string TableFilePath { get; set; }
     }
 
 }

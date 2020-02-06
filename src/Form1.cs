@@ -187,8 +187,6 @@ namespace binFileMerger
         // Traverses the list of clobs from the table.xml file and merges the .bin files and text strings with the same fileID.
         private void TableMerge()
         {
-
-
             string fileID;
             string prevFileID;
             string prevClobType;
@@ -292,7 +290,7 @@ namespace binFileMerger
         // Reads the chosen table.xml and put all info in a list of clobs.
         private void ReadTableXml(SiardTableXml lobTable)
         {
-            string contentPath = Directory.GetParent(Path.GetDirectoryName(lobTable.FilePath)).ToString();
+            string contentPath = Directory.GetParent(Path.GetDirectoryName(lobTable.TableFilePath)).ToString();
             string clobPath = Path.Combine(contentPath, lobTable.LobPath);
 
             XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
@@ -430,27 +428,37 @@ namespace binFileMerger
             DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(destFolder, "header"));
             backgroundWorker1.ReportProgress(0, "header folder copy complete.");
 
-
             Console.WriteLine("Reading: " + metadataXmlName);
             List<SiardTableXml> siardListe = finder.TableXMLFinder(metadataXmlName);
 
+            backgroundWorker1.ReportProgress(0, "Creating lobFolder.");
+            Directory.CreateDirectory(Path.Combine(destFolder, finder.LobFolder));
+
             Console.WriteLine(finder.SiardVersion);
-/*
-            foreach (SiardTable table in siardListe)
+            Console.WriteLine(finder.LobFolder);
+
+            foreach (SiardTableXml table in siardListe)
             {
-                tableXmlName = table.FilePath + @"\" + table.TableFileName + ".xml";
-                 Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.FilePath + @"\" + table.TableFileName +".xml");
+                tableXmlName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
+                Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableFolder +" " + table.TableFilePath);
 
+                if (String.IsNullOrEmpty(table.LobPath))
+                {
+                    DirectoryCopy(table.TableFilePath, Path.Combine(destFolder, table.TableFolder));
+                }else
+                {
+                    ReadTableXml(table);
+                }
                 // RunTableMerge();
-                ReadTableXml(table);
+                //ReadTableXml(table);
 
-                CreateTableXML(table);
+                //CreateTableXML(table);
 
                 //textBox1.AppendText("Merging files");
 
-                TableMerge();
+                // TableMerge();
 
-            }*/
+            }
             //zipper.siardZip(destFolder, destFolder);
 
         }
