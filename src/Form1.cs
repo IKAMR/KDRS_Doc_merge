@@ -61,7 +61,7 @@ namespace binFileMerger
                     }
                     else
                     {
-                        Console.WriteLine(clob.ClobString);
+                        //Console.WriteLine(clob.ClobString);
                         log.Add(clob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + clobs.Count + ";" + "oldSeg" + ";" + clob.ClobString);
                         using (var inputStream = File.OpenRead(clob.ClobPath))
                         {
@@ -112,7 +112,6 @@ namespace binFileMerger
                         clobCount++;
 
                         AddXMLFileInfo(prevFileID, newFileName);
-                        counter++;
                     }
                     else
                     {
@@ -120,7 +119,6 @@ namespace binFileMerger
                         BinMergeClob(mergeClobs, newFileName);
 
                         AddXMLFileInfo(prevFileID, newFileName);
-                        counter++;
                     }
 
                     mergeClobs.Clear();
@@ -145,7 +143,6 @@ namespace binFileMerger
                         clobCount++;
 
                         AddXMLFileInfo(fileID, newFileName);
-                        counter++;
                     }
                     else
                     {
@@ -153,10 +150,11 @@ namespace binFileMerger
                         BinMergeClob(mergeClobs, newFileName);
 
                         AddXMLFileInfo(fileID, newFileName);
-                        counter++;
                     }
                 }
-                progress = counter * 100 / clobTotal;
+                counter++;
+                progress = counter * 100 / clobTotal ;
+
                 backgroundWorker1.ReportProgress(progress);
             }
 
@@ -386,7 +384,6 @@ namespace binFileMerger
 
                     TableMerge(table.TableFileName);
 
-
                     string tableXSDFilePath = Path.Combine(table.TableFilePath, table.TableFileName + ".xsd");
                     string newXsdFilePath = Path.Combine(siardFolder, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
 
@@ -527,7 +524,7 @@ namespace binFileMerger
             {
                 // throw new Exception("Target folder already exist: " + targetPath);
             }
-            Console.WriteLine("Creating:" + targetPath);
+           // Console.WriteLine("Creating:" + targetPath);
 
             Directory.CreateDirectory(targetPath);
 
