@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{798A5F11-FA40-4F4B-97BC-40C6F09788A3}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>kdrs_doc_merge</RootNamespace>
-    <AssemblyName>kdrs_doc_merge</AssemblyName>
+    <RootNamespace>KDRS_Doc_merge</RootNamespace>
+    <AssemblyName>KDRS_Doc_merge</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

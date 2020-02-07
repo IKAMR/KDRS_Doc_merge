@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kdrs_doc_merge", "kdrs_doc_merge.csproj", "{798A5F11-FA40-4F4B-97BC-40C6F09788A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KDRS_Doc_merge", "KDRS_Doc_merge\KDRS_Doc_merge.csproj", "{798A5F11-FA40-4F4B-97BC-40C6F09788A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
