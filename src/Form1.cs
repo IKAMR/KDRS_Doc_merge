@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using System.Xml;
 using System.Security.Cryptography;
 using System.Text;
-using System.ComponentModel;
-using System.Threading;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace binFileMerger
 {
@@ -17,11 +16,12 @@ namespace binFileMerger
 
         string csvFileName;
         string targetFolder;
+        string siardFolder;
         string sourceFolder;
         string initFolder;
         string zip64jar;
         string inputFileName;
-        string metadataXmlName;
+        string metadataXmlName = String.Empty;
 
         Boolean filesAdded = false;
         Boolean useSeg = true;
@@ -52,7 +52,6 @@ namespace binFileMerger
                 {
                     if (clob.ClobType == "clob")
                     {
-                        //textBox1.AppendText("Merging: clob to: " + outFileName + "\n");
                         log.Add(clob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + clobs.Count + ";" + "oldSeg" + ";" + clob.ClobString);
                         byte[] byteArray = Encoding.ASCII.GetBytes(clob.ClobString);
                         using (var inputstream = new MemoryStream(byteArray))
@@ -64,7 +63,6 @@ namespace binFileMerger
                     {
                         Console.WriteLine(clob.ClobString);
                         log.Add(clob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + clobs.Count + ";" + "oldSeg" + ";" + clob.ClobString);
-                       // textBox1.AppendText("Merging: " + clob.ClobString + " to: " + outFileName + "\n");
                         using (var inputStream = File.OpenRead(clob.ClobPath))
                         {
                             inputStream.CopyTo(outputStream);
@@ -75,7 +73,7 @@ namespace binFileMerger
         }
         //--------------------------------------------------------------------------------
         // Traverses the list of clobs from the table.xml file and merges the .bin files and text strings with the same fileID.
-        private void TableMerge()
+        private void TableMerge(string tableName)
         {
             string fileID;
             string prevFileID;
@@ -101,10 +99,8 @@ namespace binFileMerger
 
             foreach (Clob clob in clobs.Skip(1))
             {
-                //Console.WriteLine("PrevFileID: " + prevFileID);
 
                 fileID = clob.FileId;
-                // Console.WriteLine("FileID: " + clob.ClobString);
 
                 if (fileID != prevFileID)
                 {
@@ -139,8 +135,6 @@ namespace binFileMerger
 
                 fileID = clob.FileId;
 
-               // textBox1.AppendText("FileId :" + clob.FileId);
-
                 if (clob == clobs.Last())
                 {
                     if (clob.ClobType == "clob" && clob.FileCount == 1)
@@ -172,9 +166,15 @@ namespace binFileMerger
             xmlWriter.WriteEndDocument();
             xmlWriter.Close();
 
-            MakeLogFile();
+            MakeLogFile(tableName);
 
             backgroundWorker1.ReportProgress(progress, "Merging complete!");
+        }
+
+        //--------------------------------------------------------------------------------
+        private void UpdateTableRows()
+        {
+
         }
         //--------------------------------------------------------------------------------
         // Reads the chosen table.xml and put all info in a list of clobs.
@@ -219,7 +219,7 @@ namespace binFileMerger
                     long clobSize = getNodeInt(row, "descendant::ns:c3", nsmgr);
                     string[] clobString = getAttributeText(row, "descendant::ns:c4", nsmgr);
 
-                    string lobPath = Path.Combine(targetFolder, finder.lobFolder, lobTable.LobPath);
+                    string lobPath = Path.Combine(siardFolder, finder.lobFolder, lobTable.LobPath);
                     clobs.Add(new Clob(fileId, fileCount, clobSize, clobString[0], clobString[1], Path.Combine(clobPath, clobString[0]), lobPath));
                 }
                 rowCount++;
@@ -292,37 +292,54 @@ namespace binFileMerger
 
         //--------------------------------------------------------------------------------
         // Prints the log list to a .csv file.
-        public void MakeLogFile()
+        public void MakeLogFile(string table)
         {
-            File.WriteAllLines(Path.Combine(Directory.GetParent(targetFolder).ToString(), "filelist_" + GetTimeStamp() + ".csv"), log);
+            File.WriteAllLines(Path.Combine(Directory.GetParent(siardFolder).ToString(), "filelist_" + table + "_" +  GetTimeStamp() + ".csv"), log);
         }
         //--------------------------------------------------------------------------------
         // Starts backgroundworker.
         private void btnRunMerge_Click(object sender, EventArgs e)
         {
 
-            //targetFolder = txtTargetFolder.Text;
+            targetFolder = txtTargetFolder.Text;
+            string targetFolderName = Path.GetFileName(targetFolder);
+            string siardName = targetFolderName + "_siard";
+            siardFolder = Path.Combine(targetFolder, siardName);
 
-            //inputFileName = txtInputFile.Text;
-            /*
+            inputFileName = txtInputFile.Text;
+            zip64jar = txtZip64Jar.Text;
+            
             string inputExt = Path.GetExtension(inputFileName);
 
-            if (inputExt.Equals("siard"))
-            {
-                filesAdded = true;
-            }
-            else if (inputFileName.Equals("metadata.xml"))
+            if (inputExt.Equals(".siard"))
             {
                 filesAdded = true;
 
+                metadataXmlName = finder.MetaFileFinder(inputFileName, targetFolder, zip64jar);
+
+                DirectoryInfo metaDirInfo = new DirectoryInfo(metadataXmlName);
+                string metaGrandParent = metaDirInfo.Parent.Parent.FullName;
+
+                sourceFolder = metaGrandParent;
+            }
+            else if (Path.GetFileName(inputFileName).Equals("metadata.xml"))
+            {
+                filesAdded = true;
+
+                metadataXmlName = inputFileName;
+
+                DirectoryInfo metaDirInfo = new DirectoryInfo(inputFileName);
+                string metaGrandParent = metaDirInfo.Parent.Parent.FullName;
+
+                sourceFolder = metaGrandParent;
             }
             else
                 textBox1.Text = "Please choose a valid file type! (.siard or metadata.xml)";
-              */ 
+              
 
             if (filesAdded)
             {
-                Directory.CreateDirectory(targetFolder);
+                Directory.CreateDirectory(siardFolder);
 
                 backgroundWorker1 = new BackgroundWorker();
                 backgroundWorker1.DoWork += backgroundWorker1_DoWork;
@@ -338,14 +355,13 @@ namespace binFileMerger
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             backgroundWorker1.ReportProgress(0, "Copying header folder.");
-            DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(targetFolder, "header"));
+            DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(siardFolder, "header"));
             backgroundWorker1.ReportProgress(0, "header folder copy complete.");
 
-            Console.WriteLine("Reading: " + metadataXmlName);
             List<SiardTableXml> siardListe = finder.TableXMLFinder(metadataXmlName);
 
             backgroundWorker1.ReportProgress(0, "Creating lobFolder.");
-            Directory.CreateDirectory(Path.Combine(targetFolder, finder.LobFolder));
+            Directory.CreateDirectory(Path.Combine(siardFolder, finder.LobFolder));
 
             Console.WriteLine(finder.SiardVersion);
             Console.WriteLine(finder.LobFolder);
@@ -356,40 +372,34 @@ namespace binFileMerger
 
                 if (String.IsNullOrEmpty(table.LobPath))
                 {
-                    DirectoryCopy(table.TableFilePath, Path.Combine(targetFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
+                    DirectoryCopy(table.TableFilePath, Path.Combine(siardFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
                 }else
                 {
                     Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
 
-                    Directory.CreateDirectory(Path.Combine(targetFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
+                    Directory.CreateDirectory(Path.Combine(siardFolder, finder.lobFolder, table.TableSchema, table.TableFileName));
 
                     ReadTableXml(table);
                     CreateTableXML(table);
 
                     backgroundWorker1.ReportProgress(0, "Merging files");
 
-                    TableMerge();
+                    TableMerge(table.TableFileName);
 
 
                     string tableXSDFilePath = Path.Combine(table.TableFilePath, table.TableFileName + ".xsd");
-                    string newXsdFilePath = Path.Combine(targetFolder, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
+                    string newXsdFilePath = Path.Combine(siardFolder, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
 
                     File.Copy(tableXSDFilePath, newXsdFilePath);
                 }
-                // RunTableMerge();
-                //ReadTableXml(table);
-
-                //CreateTableXML(table);
-
-                //textBox1.AppendText("Merging files");
-
-                // TableMerge();
-
             }
 
             if (chkBxMakeSiard.Checked)
-                zipper.SiardZip(targetFolder, targetFolder, zip64jar);
-
+            {
+                string targetFolderName = Path.GetFileName(targetFolder);
+                string zipName = Path.Combine(targetFolder, targetFolderName); 
+                zipper.SiardZip(siardFolder, zipName, zip64jar);
+            }
         }
         //--------------------------------------------------------------------------------
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -414,7 +424,7 @@ namespace binFileMerger
             textBox1.Clear();
 
             sourceFolder = null;
-            targetFolder = null;
+            siardFolder = null;
             csvFileName = null;
 
             clobs.Clear();
@@ -443,7 +453,7 @@ namespace binFileMerger
             listBox1.Items.Add("csv file: " + csvFileName);
 
             listBox1.Items.Add("Source folder: " + sourceFolder);
-            listBox1.Items.Add("Destination folder: " + targetFolder);
+            listBox1.Items.Add("Destination folder: " + siardFolder);
             listBox1.Items.Add("metadata.xml: " + metadataXmlName);
 
             listBox1.Items.Add(GetTimeStamp());
@@ -460,13 +470,13 @@ namespace binFileMerger
                 .ToDictionary(s => s[0].Trim(), s => s[1].Trim());
 
             sourceFolder = dic["sourcePath"];
-            targetFolder = dic["destPath"];
+            siardFolder = dic["destPath"];
             zip64jar = dic["zip64jar"];
 
 
             metadataXmlName = Path.Combine(sourceFolder, @"header\metadata.xml");
 
-            Directory.CreateDirectory(targetFolder);
+            Directory.CreateDirectory(siardFolder);
 
             filesAdded = true;
         }
@@ -483,7 +493,7 @@ namespace binFileMerger
                 IndentChars = "    "
             };
 
-            xmlWriter = XmlWriter.Create(Path.Combine(targetFolder, finder.LobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xml"), xmlWriterSettings);
+            xmlWriter = XmlWriter.Create(Path.Combine(siardFolder, finder.LobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xml"), xmlWriterSettings);
 
             xmlWriter.WriteStartDocument();
 
@@ -661,6 +671,13 @@ namespace binFileMerger
             DialogResult dr = folderBrowserDialog1.ShowDialog();
             if (dr == DialogResult.OK)
                 txtTargetFolder.Text = folderBrowserDialog1.SelectedPath;
+        }
+        //--------------------------------------------------------------------------------
+        private void btnZip64Jar_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = folderBrowserDialog1.ShowDialog();
+            if (dr == DialogResult.OK)
+                txtZip64Jar.Text = folderBrowserDialog1.SelectedPath;
         }
     }
 

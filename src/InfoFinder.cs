@@ -77,13 +77,13 @@ namespace binFileMerger
         }
         //--------------------------------------------------------------------------------
 
-        private string MetaFileFinder(string siardFile)
+        public string MetaFileFinder(string siardFile, string targetFolder, string jarPath)
         {
-            string unZipFolder = Path.GetDirectoryName(siardFile) + "_unziped";
+            string unZipFolder = Path.Combine(targetFolder, Path.GetFileNameWithoutExtension(siardFile) + "_unziped");
 
-            unzipper.SiardUnZip(siardFile, unZipFolder);
+            unzipper.SiardUnZip(siardFile, unZipFolder, jarPath);
 
-            return unZipFolder + @"\header\metadata.xml";
+            return Path.Combine(unZipFolder, "header" , "metadata.xml");
         }
         //--------------------------------------------------------------------------------
         // Returns text in the queried node.

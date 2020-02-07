@@ -15,7 +15,7 @@ namespace binFileMerger
             string source = "-d=" + folder;
             string target = targetName + ".siard";
 
-            string javaCommand = " -jar " + jarPath + " n " + source + " " + target;
+            string javaCommand = " -jar " + jarPath + " n -c " + source + " " + target;
 
             Process proc = new Process();
 
@@ -40,13 +40,13 @@ namespace binFileMerger
             }
         }
 
-        public void SiardUnZip(string targetFolder, string sourceFile)
+        public void SiardUnZip(string sourceFile, string targetFolder, string jarPath)
         {
-            string javaPath = @"C:\prog\zip64_v2.1.58\zip64-2.1.58\lib\zip64.jar";
-            string target = "-d=" + targetFolder;
-            string source = sourceFile + ".siard";
+            //string javaPath = @"C:\prog\zip64_v2.1.58\zip64-2.1.58\lib\zip64.jar";
+            string target = "-d=\"" + targetFolder + "\"";
+            string source = sourceFile;
 
-            string javaCommand = " -jar " + javaPath + " x " + target + " " + source;
+            string javaCommand = " -jar " + jarPath + " x " + target + " " + source;
 
             Process proc = new Process();
 
@@ -65,6 +65,7 @@ namespace binFileMerger
             {
                 Console.WriteLine("Creating .siard");
                 proc.Start();
+                proc.WaitForExit();
                 Console.WriteLine(".siard Created");
             }
             catch
