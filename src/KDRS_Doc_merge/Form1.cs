@@ -693,9 +693,9 @@ namespace binFileMerger
         //--------------------------------------------------------------------------------
         private void btnZip64Jar_Click(object sender, EventArgs e)
         {
-            DialogResult dr = folderBrowserDialog1.ShowDialog();
+            DialogResult dr = openFileDialog1.ShowDialog();
             if (dr == DialogResult.OK)
-                txtZip64Jar.Text = folderBrowserDialog1.SelectedPath;
+                txtZip64Jar.Text = openFileDialog1.FileName;
         }
     }
 
