@@ -96,6 +96,7 @@ namespace binFileMerger
             int clobCount = 0;
             int clobTotal = clobs.Count-2;
             int progress = 0;
+            int progressCount = 0;
 
             foreach (Clob clob in clobs.Skip(1))
             {
@@ -112,6 +113,7 @@ namespace binFileMerger
                         clobCount++;
 
                         AddXMLFileInfo(prevFileID, newFileName);
+                        counter++;
                     }
                     else
                     {
@@ -119,6 +121,7 @@ namespace binFileMerger
                         BinMergeClob(mergeClobs, newFileName);
 
                         AddXMLFileInfo(prevFileID, newFileName);
+                        counter++;
                     }
 
                     mergeClobs.Clear();
@@ -143,6 +146,7 @@ namespace binFileMerger
                         clobCount++;
 
                         AddXMLFileInfo(fileID, newFileName);
+                        counter++;
                     }
                     else
                     {
@@ -150,10 +154,11 @@ namespace binFileMerger
                         BinMergeClob(mergeClobs, newFileName);
 
                         AddXMLFileInfo(fileID, newFileName);
+                        counter++;
                     }
                 }
-                counter++;
-                progress = counter * 100 / clobTotal ;
+                progressCount++;
+                progress = progressCount * 100 / clobTotal ;
 
                 backgroundWorker1.ReportProgress(progress);
             }
@@ -164,15 +169,31 @@ namespace binFileMerger
             xmlWriter.WriteEndDocument();
             xmlWriter.Close();
 
+            UpdateTableRows(tableName, counter);
+
             MakeLogFile(tableName);
 
             backgroundWorker1.ReportProgress(progress, "Merging complete!");
         }
 
         //--------------------------------------------------------------------------------
-        private void UpdateTableRows()
+        private void UpdateTableRows(string table, int rows)
         {
+            XmlDocument metadata = new XmlDocument();
+            string newMetadataPath = Path.Combine(siardFolder, "header", "metadata.xml");
+            metadata.Load(newMetadataPath);
 
+            var nsmgr = new XmlNamespaceManager(metadata.NameTable);
+            var nameSpace = metadata.DocumentElement.NamespaceURI;
+            nsmgr.AddNamespace("ns", nameSpace);
+
+            string query = "descendant::ns:table[ns:folder = '" + table + "']/ns:rows";
+            XmlNode root = metadata.DocumentElement;
+            XmlNode rowsNode = root.SelectSingleNode(query, nsmgr);
+
+            rowsNode.InnerText = rows.ToString();
+
+            metadata.Save(newMetadataPath);
         }
         //--------------------------------------------------------------------------------
         // Reads the chosen table.xml and put all info in a list of clobs.
