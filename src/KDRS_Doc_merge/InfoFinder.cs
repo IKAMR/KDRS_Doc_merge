@@ -58,9 +58,13 @@ namespace binFileMerger
                 string lobpath = getNodeText(table, "ns:columns/ns:column/ns:lobFolder", nsmgr);
                 string schema = table.ParentNode.ParentNode["folder"].InnerText.ToString();
                 string tableName = getNodeText(table, "ns:folder", nsmgr);
+                string tableNameDb = getNodeText(table, "ns:name", nsmgr);
 
-                tableList.Add(new SiardTableXml(tableName, lobpath, schema, Path.Combine(metaGrandParent, lobFolder, schema, tableName)));
-
+                // TAA must be changed to (from tableNameDb and tableName)
+                //      tableName == database name, f. ex. "files" 
+                //      tableFolder == SIARD folder for the table, f. ex. "table2"
+                // TAA: Added tableNameDb as first element = the name of the table in the database
+                tableList.Add(new SiardTableXml(tableName, lobpath, schema, Path.Combine(metaGrandParent, lobFolder, schema, tableName), tableNameDb));
             }
             /*
             foreach (XmlNode node in liste)
@@ -79,11 +83,11 @@ namespace binFileMerger
 
         public string MetaFileFinder(string siardFile, string targetFolder, string jarPath)
         {
-            string unZipFolder = Path.Combine(targetFolder, Path.GetFileNameWithoutExtension(siardFile) + "_unziped");
+            // string unZipFolder = Path.Combine(targetFolder, Path.GetFileNameWithoutExtension(siardFile) + "_unziped");
 
-            unzipper.SiardUnZip(siardFile, unZipFolder, jarPath);
+            unzipper.SiardUnZip(siardFile, targetFolder, jarPath);
 
-            return Path.Combine(unZipFolder, "header" , "metadata.xml");
+            return Path.Combine(targetFolder, "header" , "metadata.xml");
         }
         //--------------------------------------------------------------------------------
         // Returns text in the queried node.
@@ -107,14 +111,16 @@ namespace binFileMerger
 
     public class SiardTableXml
     {
-        public SiardTableXml(string tableFileName, string lobPath, string tableSchema, string tableFilePath)
+        public SiardTableXml(string tableFileName, string lobPath, string tableSchema, string tableFilePath, string tableNameDb)
         {
+            TableNameDb = tableNameDb;
             TableFileName = tableFileName;
             LobPath = lobPath;
             TableSchema = tableSchema;
             this.TableFilePath = tableFilePath;
         }
 
+        public string TableNameDb { get; set; }
         public string TableFileName { get; set;}
         public string LobPath { get; set; }
         public string TableSchema { get; set; }

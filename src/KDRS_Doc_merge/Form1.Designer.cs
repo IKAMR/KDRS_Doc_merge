@@ -31,7 +31,6 @@
             this.Reset = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.btnRunMerge = new System.Windows.Forms.Button();
-            this.listBox1 = new System.Windows.Forms.ListBox();
             this.button2 = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
@@ -44,13 +43,15 @@
             this.chkBxMakeSiard = new System.Windows.Forms.CheckBox();
             this.txtZip64Jar = new System.Windows.Forms.TextBox();
             this.btnZip64Jar = new System.Windows.Forms.Button();
+            this.btnTest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Reset
             // 
-            this.Reset.Location = new System.Drawing.Point(11, 319);
+            this.Reset.Location = new System.Drawing.Point(20, 369);
+            this.Reset.Margin = new System.Windows.Forms.Padding(6);
             this.Reset.Name = "Reset";
-            this.Reset.Size = new System.Drawing.Size(164, 53);
+            this.Reset.Size = new System.Drawing.Size(145, 98);
             this.Reset.TabIndex = 7;
             this.Reset.Text = "Reset";
             this.Reset.UseVisualStyleBackColor = true;
@@ -58,41 +59,39 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(195, 254);
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(358, 245);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(6);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(538, 118);
+            this.textBox1.Size = new System.Drawing.Size(983, 490);
             this.textBox1.TabIndex = 6;
             // 
             // btnRunMerge
             // 
-            this.btnRunMerge.Location = new System.Drawing.Point(11, 252);
+            this.btnRunMerge.Location = new System.Drawing.Point(20, 245);
+            this.btnRunMerge.Margin = new System.Windows.Forms.Padding(6);
             this.btnRunMerge.Name = "btnRunMerge";
-            this.btnRunMerge.Size = new System.Drawing.Size(164, 60);
+            this.btnRunMerge.Size = new System.Drawing.Size(301, 111);
             this.btnRunMerge.TabIndex = 5;
             this.btnRunMerge.Text = "Merge files";
             this.btnRunMerge.UseVisualStyleBackColor = true;
             this.btnRunMerge.Click += new System.EventHandler(this.btnRunMerge_Click);
             // 
-            // listBox1
-            // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(11, 169);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(722, 69);
-            this.listBox1.TabIndex = 4;
-            // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(11, 11);
-            this.button2.Margin = new System.Windows.Forms.Padding(2);
+            this.button2.Location = new System.Drawing.Point(20, 20);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(95, 26);
+            this.button2.Size = new System.Drawing.Size(174, 48);
             this.button2.TabIndex = 8;
             this.button2.Text = "Choose init-file";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // openFileDialog1
@@ -106,25 +105,31 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 378);
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(31, 747);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(6);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(721, 23);
+            this.progressBar1.Size = new System.Drawing.Size(1322, 42);
             this.progressBar1.Step = 1;
             this.progressBar1.TabIndex = 9;
             // 
             // txtInputFile
             // 
-            this.txtInputFile.Location = new System.Drawing.Point(111, 63);
+            this.txtInputFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtInputFile.Location = new System.Drawing.Point(204, 116);
+            this.txtInputFile.Margin = new System.Windows.Forms.Padding(6);
             this.txtInputFile.Name = "txtInputFile";
-            this.txtInputFile.Size = new System.Drawing.Size(623, 20);
+            this.txtInputFile.Size = new System.Drawing.Size(1139, 29);
             this.txtInputFile.TabIndex = 10;
             // 
             // btnInputFile
             // 
-            this.btnInputFile.Location = new System.Drawing.Point(11, 46);
-            this.btnInputFile.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInputFile.Location = new System.Drawing.Point(20, 85);
+            this.btnInputFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnInputFile.Name = "btnInputFile";
-            this.btnInputFile.Size = new System.Drawing.Size(95, 37);
+            this.btnInputFile.Size = new System.Drawing.Size(174, 68);
             this.btnInputFile.TabIndex = 11;
             this.btnInputFile.Text = "Choose input-file siard/metadata";
             this.btnInputFile.UseVisualStyleBackColor = true;
@@ -132,10 +137,10 @@
             // 
             // btnTargetFolder
             // 
-            this.btnTargetFolder.Location = new System.Drawing.Point(11, 87);
-            this.btnTargetFolder.Margin = new System.Windows.Forms.Padding(2);
+            this.btnTargetFolder.Location = new System.Drawing.Point(20, 161);
+            this.btnTargetFolder.Margin = new System.Windows.Forms.Padding(4);
             this.btnTargetFolder.Name = "btnTargetFolder";
-            this.btnTargetFolder.Size = new System.Drawing.Size(95, 37);
+            this.btnTargetFolder.Size = new System.Drawing.Size(174, 68);
             this.btnTargetFolder.TabIndex = 12;
             this.btnTargetFolder.Text = "Choose target folder";
             this.btnTargetFolder.UseVisualStyleBackColor = true;
@@ -143,44 +148,63 @@
             // 
             // txtTargetFolder
             // 
-            this.txtTargetFolder.Location = new System.Drawing.Point(111, 104);
+            this.txtTargetFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTargetFolder.Location = new System.Drawing.Point(204, 192);
+            this.txtTargetFolder.Margin = new System.Windows.Forms.Padding(6);
             this.txtTargetFolder.Name = "txtTargetFolder";
-            this.txtTargetFolder.Size = new System.Drawing.Size(623, 20);
+            this.txtTargetFolder.Size = new System.Drawing.Size(1139, 29);
             this.txtTargetFolder.TabIndex = 13;
             // 
             // chkBxMakeSiard
             // 
             this.chkBxMakeSiard.AutoSize = true;
-            this.chkBxMakeSiard.Location = new System.Drawing.Point(122, 17);
+            this.chkBxMakeSiard.Location = new System.Drawing.Point(224, 31);
+            this.chkBxMakeSiard.Margin = new System.Windows.Forms.Padding(6);
             this.chkBxMakeSiard.Name = "chkBxMakeSiard";
-            this.chkBxMakeSiard.Size = new System.Drawing.Size(81, 17);
+            this.chkBxMakeSiard.Size = new System.Drawing.Size(139, 29);
             this.chkBxMakeSiard.TabIndex = 14;
             this.chkBxMakeSiard.Text = "Make .siard";
             this.chkBxMakeSiard.UseVisualStyleBackColor = true;
             // 
             // txtZip64Jar
             // 
-            this.txtZip64Jar.Location = new System.Drawing.Point(308, 17);
+            this.txtZip64Jar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtZip64Jar.Location = new System.Drawing.Point(565, 31);
+            this.txtZip64Jar.Margin = new System.Windows.Forms.Padding(6);
             this.txtZip64Jar.Name = "txtZip64Jar";
-            this.txtZip64Jar.Size = new System.Drawing.Size(425, 20);
+            this.txtZip64Jar.Size = new System.Drawing.Size(776, 29);
             this.txtZip64Jar.TabIndex = 15;
             // 
             // btnZip64Jar
             // 
-            this.btnZip64Jar.Location = new System.Drawing.Point(208, 11);
-            this.btnZip64Jar.Margin = new System.Windows.Forms.Padding(2);
+            this.btnZip64Jar.Location = new System.Drawing.Point(381, 20);
+            this.btnZip64Jar.Margin = new System.Windows.Forms.Padding(4);
             this.btnZip64Jar.Name = "btnZip64Jar";
-            this.btnZip64Jar.Size = new System.Drawing.Size(95, 28);
+            this.btnZip64Jar.Size = new System.Drawing.Size(174, 52);
             this.btnZip64Jar.TabIndex = 16;
             this.btnZip64Jar.Text = "zip64 jar";
             this.btnZip64Jar.UseVisualStyleBackColor = true;
             this.btnZip64Jar.Click += new System.EventHandler(this.btnZip64Jar_Click);
             // 
+            // btnTest
+            // 
+            this.btnTest.Location = new System.Drawing.Point(176, 368);
+            this.btnTest.Margin = new System.Windows.Forms.Padding(6);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.Size = new System.Drawing.Size(145, 98);
+            this.btnTest.TabIndex = 17;
+            this.btnTest.Text = "Test";
+            this.btnTest.UseVisualStyleBackColor = true;
+            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(746, 412);
+            this.ClientSize = new System.Drawing.Size(1368, 804);
+            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.btnZip64Jar);
             this.Controls.Add(this.txtZip64Jar);
             this.Controls.Add(this.chkBxMakeSiard);
@@ -193,7 +217,7 @@
             this.Controls.Add(this.Reset);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.btnRunMerge);
-            this.Controls.Add(this.listBox1);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "Form1";
             this.Text = "KDRS SIARD TOOLS";
             this.ResumeLayout(false);
@@ -206,7 +230,6 @@
         private System.Windows.Forms.Button Reset;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button btnRunMerge;
-        private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
@@ -219,6 +242,7 @@
         private System.Windows.Forms.CheckBox chkBxMakeSiard;
         private System.Windows.Forms.TextBox txtZip64Jar;
         private System.Windows.Forms.Button btnZip64Jar;
+        private System.Windows.Forms.Button btnTest;
     }
 }
 
