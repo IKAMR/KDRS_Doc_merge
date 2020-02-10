@@ -85,6 +85,7 @@ namespace binFileMerger
             string newFileName;
             // int countFileInline = 0;
             // int countFileLob = 0;
+            int debugCountFilesMax = 500;
 
 
             List<Lob> mergeLobs = new List<Lob>();
@@ -169,6 +170,10 @@ namespace binFileMerger
                 progress = progressCount * 100 / lobTotal ;
 
                 backgroundWorker1.ReportProgress(progress);
+
+                // Debug
+                if (debugCountFilesMax >= counter)
+                    break;
             }
 
             xmlWriter.WriteComment("Row count: " + counter);
