@@ -68,7 +68,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(983, 833);
+            this.textBox1.Size = new System.Drawing.Size(983, 986);
             this.textBox1.TabIndex = 6;
             // 
             // btnRunMerge
@@ -107,7 +107,7 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(31, 1090);
+            this.progressBar1.Location = new System.Drawing.Point(31, 1243);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(6);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(1322, 42);
@@ -205,7 +205,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1368, 1147);
+            this.ClientSize = new System.Drawing.Size(1368, 1300);
             this.Controls.Add(this.btnTest);
             this.Controls.Add(this.btnZip64Jar);
             this.Controls.Add(this.txtZip64Jar);

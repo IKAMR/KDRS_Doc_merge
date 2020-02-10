@@ -83,6 +83,9 @@ namespace binFileMerger
 
             int fileCount = 0;
             string newFileName;
+            // int countFileInline = 0;
+            // int countFileLob = 0;
+
 
             List<Lob> mergeLobs = new List<Lob>();
 
@@ -141,6 +144,7 @@ namespace binFileMerger
                 {
                     if (lob.LobType == "lob" && lob.FileCount == 1)
                     {
+                        // inline xml data
                         string lobFileName = Path.Combine("seg", "lobRec" + lobCount + ".bin");
                         newFileName = FileNameChanger(lob.LobFolder, lobFileName, fileCount);
                         BinMergeLob(mergeLobs, newFileName);
@@ -148,14 +152,17 @@ namespace binFileMerger
 
                         AddXMLFileInfo(fileID, newFileName);
                         counter++;
+                        // countFileInline++;                        
                     }
                     else
                     {
+                        // file referred by attribute
                         newFileName = FileNameChanger(lob.LobFolder, mergeLobs[0].LobString, fileCount);
                         BinMergeLob(mergeLobs, newFileName);
 
                         AddXMLFileInfo(fileID, newFileName);
                         counter++;
+                        // countFileLob++;
                     }
                 }
                 progressCount++;
@@ -174,7 +181,9 @@ namespace binFileMerger
 
             MakeLogFile(tableName);
 
-            // backgroundWorker1.ReportProgress(progress, "Merging complete!");
+            // backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files from " + prevFileCount + " rows");
+            backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files");
+            // backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " (" + countFileInline + " from inline, " + countFileLob + " lob)");
         }
 
         //--------------------------------------------------------------------------------
@@ -251,7 +260,7 @@ namespace binFileMerger
 
             comments = tableXml.SelectNodes("//comment()", nsmgr);
 
-            // backgroundWorker1.ReportProgress(progress, "Table xml file read");
+            backgroundWorker1.ReportProgress(progress, ", table loaded");
         }
         //--------------------------------------------------------------------------------
         // Creates a new filename which includes the number of files the new file consists of.
@@ -366,7 +375,8 @@ namespace binFileMerger
         // Starts file transfering and file handling.
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            Boolean doMergeFiles;
+            bool doMergeFiles;
+            bool hasLob;
             string tempString;
             string tempString2;
             int countTableStd = 0;
@@ -374,7 +384,7 @@ namespace binFileMerger
 
             if (!Globals.testMode)
             {
-                backgroundWorker1.ReportProgress(0, @"Copying \header\metadata.xml");
+                backgroundWorker1.ReportProgress(0, "\r\n" + @"Copying \header\metadata.xml");
                 DirectoryCopy(Path.Combine(sourceFolder, "header"), Path.Combine(siardFolderOutput, "header"));
             }
 
@@ -382,22 +392,24 @@ namespace binFileMerger
 
             if (!Globals.testMode)
             {
-                backgroundWorker1.ReportProgress(0, "Creating root lobFolder: " + finder.LobFolder);
+                backgroundWorker1.ReportProgress(0, "\r\nCreating root lobFolder: " + finder.LobFolder);
                 Directory.CreateDirectory(Path.Combine(siardFolderOutput, finder.LobFolder));
             }
 
             Console.WriteLine("SIARD version: " + finder.SiardVersion);
             Console.WriteLine("Root lobFolder: " + finder.LobFolder);
-            backgroundWorker1.ReportProgress(0, "SIARD version: " + finder.SiardVersion);
-            backgroundWorker1.ReportProgress(0, "\r\nTables:\r\n");
+            backgroundWorker1.ReportProgress(0, "\r\nSIARD version: " + finder.SiardVersion);
+            backgroundWorker1.ReportProgress(0, "\r\n\r\nTables:\r\n");
 
             foreach (SiardTableXml table in siardListe)
             {
                 doMergeFiles = false;
+                hasLob = false;
                 inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
 
                 if (!String.IsNullOrEmpty(table.LobPath))
                 {
+                    hasLob = true;
                     Console.WriteLine("LOB: " + table.TableNameDb +" | "+ table.TableNameDb);
                     tempString = table.TableNameDb;
                     tempString = tempString.ToUpper();                    
@@ -419,17 +431,24 @@ namespace binFileMerger
                 if (!doMergeFiles)
                 {
                     countTableStd++;
-                    Console.WriteLine("Copy table: " + table.TableNameDb);
-                    backgroundWorker1.ReportProgress(0, table.TableNameDb);
+                    Console.WriteLine("Copy table: " + table.TableFileName  +" | "+ table.TableNameDb);
+                    backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb);
+                    if (hasLob)
+                        backgroundWorker1.ReportProgress(0, " | LOB");
+                    else
+                        backgroundWorker1.ReportProgress(0, " |");
                     if (!Globals.testMode)
+                    {
                         DirectoryCopy(table.TableFilePath, Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName));
+                        backgroundWorker1.ReportProgress(0, " copied");
+                    }
                 }
                 else
                 {
                     countTableLob++;
                     Console.WriteLine("LOB table: " + table.TableNameDb);
                     Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
-                    backgroundWorker1.ReportProgress(0, table.TableNameDb + " <<< LOB merge");
+                    backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | LOB");
                     if (!Globals.testMode)
                     {
                         Directory.CreateDirectory(Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName));
@@ -443,12 +462,13 @@ namespace binFileMerger
                         string newXsdFilePath = Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
 
                         File.Copy(tableXSDFilePath, newXsdFilePath);
+                        // backgroundWorker1.ReportProgress(0, " merged");
                     }
                 }
             }
-            backgroundWorker1.ReportProgress(0, "\r\nStandard tables  = " + countTableStd);
-            backgroundWorker1.ReportProgress(0, "LOB tables = " + countTableLob);
-            backgroundWorker1.ReportProgress(0, "Total number of tables = " + (countTableStd + countTableLob));
+            backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
+            backgroundWorker1.ReportProgress(0, "\r\nLOB tables = " + countTableLob);
+            backgroundWorker1.ReportProgress(0, "\r\nTotal number of tables = " + (countTableStd + countTableLob));
 
             if (chkBxMakeSiard.Checked)
             {
@@ -464,13 +484,17 @@ namespace binFileMerger
             //Console.WriteLine("Progress: " + e.ProgressPercentage);
             if (e.UserState != null)
             {
-                textBox1.AppendText("\r\n" + e.UserState.ToString());
+                textBox1.AppendText(e.UserState.ToString());
             }
         }
         //--------------------------------------------------------------------------------
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             textBox1.AppendText("\r\n\r\nJob complete");
+
+            // Save logfile
+            string logFile = Path.Combine(targetFolder, "kdrs-doc-merge_log_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
+            System.IO.File.AppendAllText(logFile, textBox1.Text);
         }
 
         //--------------------------------------------------------------------------------
@@ -752,6 +776,7 @@ namespace binFileMerger
         public static readonly String toolName = "KDRS Doc merge";
         public static readonly String toolVersion = "0.3.1";
 
+        public static int countFiles = 0;
         public static bool testMode = false;
     }
     public class BinFile
