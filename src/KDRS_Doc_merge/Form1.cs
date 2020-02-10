@@ -40,6 +40,8 @@ namespace binFileMerger
         public Form1()
         {
             InitializeComponent();
+
+            Text = Globals.toolName + " v" + Globals.toolVersion;
         }
 
         //--------------------------------------------------------------------------------
