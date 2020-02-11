@@ -49,7 +49,7 @@ namespace binFileMerger
             textBox1.Text = "Start file merge";
             try
             {
-                initDocMerge();
+                InitDocMerge();
             }
             catch(Exception ex)
             {
@@ -58,7 +58,7 @@ namespace binFileMerger
         }
 
         //--------------------------------------------------------------------------------
-        private void initDocMerge()
+        private void InitDocMerge()
         {
             targetFolder = txtTargetFolder.Text;
             string siardNameOutput = "siard_structure_output";
@@ -829,7 +829,7 @@ namespace binFileMerger
             textBox1.Text = "Start testmode";
             try
             {
-                initDocMerge();
+                InitDocMerge();
             }
             catch (Exception ex)
             {
@@ -843,7 +843,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.1";
+        public static readonly String toolVersion = "0.3.3";
 
         public static int countFiles = 0;
 
