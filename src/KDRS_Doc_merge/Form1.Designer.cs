@@ -44,6 +44,7 @@
             this.txtZip64Jar = new System.Windows.Forms.TextBox();
             this.btnZip64Jar = new System.Windows.Forms.Button();
             this.btnTest = new System.Windows.Forms.Button();
+            this.chkBxFilesLimit = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Reset
@@ -201,11 +202,23 @@
             this.btnTest.UseVisualStyleBackColor = true;
             this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
             // 
+            // chkBxFilesLimit
+            // 
+            this.chkBxFilesLimit.AutoSize = true;
+            this.chkBxFilesLimit.Location = new System.Drawing.Point(26, 479);
+            this.chkBxFilesLimit.Margin = new System.Windows.Forms.Padding(6);
+            this.chkBxFilesLimit.Name = "chkBxFilesLimit";
+            this.chkBxFilesLimit.Size = new System.Drawing.Size(245, 29);
+            this.chkBxFilesLimit.TabIndex = 18;
+            this.chkBxFilesLimit.Text = "Limit to 500 files pr table";
+            this.chkBxFilesLimit.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1368, 1300);
+            this.Controls.Add(this.chkBxFilesLimit);
             this.Controls.Add(this.btnTest);
             this.Controls.Add(this.btnZip64Jar);
             this.Controls.Add(this.txtZip64Jar);
@@ -245,6 +258,7 @@
         private System.Windows.Forms.TextBox txtZip64Jar;
         private System.Windows.Forms.Button btnZip64Jar;
         private System.Windows.Forms.Button btnTest;
+        private System.Windows.Forms.CheckBox chkBxFilesLimit;
     }
 }
 

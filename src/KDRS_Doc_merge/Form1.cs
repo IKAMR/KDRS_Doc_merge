@@ -41,7 +41,7 @@ namespace binFileMerger
         {
             InitializeComponent();
 
-            Text = Globals.toolName + " v" + Globals.toolVersion;
+            Text = Globals.toolName + " v" + Globals.toolVersion;            
         }
 
         //--------------------------------------------------------------------------------
@@ -85,9 +85,7 @@ namespace binFileMerger
             string newFileName;
             // int countFileInline = 0;
             // int countFileLob = 0;
-            int debugCountFilesMax = 500;
-
-
+            
             List<Lob> mergeLobs = new List<Lob>();
 
             prevFileID = lobs[0].FileId;
@@ -172,8 +170,9 @@ namespace binFileMerger
                 backgroundWorker1.ReportProgress(progress);
 
                 // Debug
-                if (debugCountFilesMax >= counter)
-                    break;
+                if (Globals.limitFilesMode)
+                    if (Globals.limitFilesNumber >= counter)
+                        break;
             }
 
             xmlWriter.WriteComment("Row count: " + counter);
@@ -327,6 +326,10 @@ namespace binFileMerger
             zip64jar = txtZip64Jar.Text;
 
             string inputExt = Path.GetExtension(inputFileName);
+
+            Globals.limitFilesMode = chkBxFilesLimit.Checked;
+            if (Globals.limitFilesMode)
+                textBox1.AppendText("\r\nLimits LOB table to " + Globals.limitFilesNumber +" files");
 
             if (inputExt.Equals(".siard"))
             {
@@ -782,7 +785,13 @@ namespace binFileMerger
         public static readonly String toolVersion = "0.3.1";
 
         public static int countFiles = 0;
+
+        // Test mode skips creating output files, just unpack .siard and counts
         public static bool testMode = false;
+
+        // If checked use this limit on max files per LOB table to debug
+        public static bool limitFilesMode;
+        public static int limitFilesNumber = 500;
     }
     public class BinFile
     {
