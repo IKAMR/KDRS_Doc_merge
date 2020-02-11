@@ -30,7 +30,6 @@ namespace binFileMerger
         List<Lob> lobs = new List<Lob>();
         XmlNodeList comments;
 
-        List<string> files = new List<string>();
         List<string> log = new List<string>();
 
         SiardZipper zipper = new SiardZipper();
@@ -42,15 +41,20 @@ namespace binFileMerger
 
             Text = Globals.toolName + " v" + Globals.toolVersion;            
         }
-
-
         //--------------------------------------------------------------------------------
         // Starts backgroundworker.
         private void btnRunMerge_Click(object sender, EventArgs e)
         {
             Globals.testMode = false;
             textBox1.Text = "Start file merge";
-            initDocMerge();
+            try
+            {
+                initDocMerge();
+            }
+            catch(Exception ex)
+            {
+                backgroundWorker1.ReportProgress(0, ex.Message);
+            }
         }
 
         //--------------------------------------------------------------------------------
@@ -113,7 +117,6 @@ namespace binFileMerger
                 backgroundWorker1.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
                 backgroundWorker1.WorkerReportsProgress = true;
                 backgroundWorker1.RunWorkerAsync();
-
             }
         }
 
@@ -250,7 +253,14 @@ namespace binFileMerger
 
             // Save logfile
             string logFile = Path.Combine(targetFolder, "kdrs-doc-merge_log_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
-            System.IO.File.AppendAllText(logFile, textBox1.Text);
+            try
+            {
+                File.AppendAllText(logFile, targetFolder);
+            }
+            catch
+            {
+                throw new Exception("Unable to create log file");
+            }
         }
         //--------------------------------------------------------------------------------
         // Reads the chosen table.xml and put all info in a list of lobs.
@@ -585,12 +595,23 @@ namespace binFileMerger
             textBox1.Clear();
 
             sourceFolder = null;
+            targetFolder = null;
+
             siardFolderOutput = null;
             csvFileName = null;
 
             lobs.Clear();
+            metadataXmlName = null;
 
-            xmlWriter.Close();
+            zip64jar = null;
+            inputFileName = null;
+
+            txtInputFile.Text = "";
+            txtTargetFolder.Text = "";
+            txtZip64Jar.Text = "";
+
+            if (xmlWriter != null)
+                xmlWriter.Close();
         }
         #endregion
         //--------------------------------------------------------------------------------
@@ -806,7 +827,14 @@ namespace binFileMerger
         {
             Globals.testMode = true;
             textBox1.Text = "Start testmode";
-            initDocMerge();
+            try
+            {
+                initDocMerge();
+            }
+            catch (Exception ex)
+            {
+                backgroundWorker1.ReportProgress(0, ex.Message);
+            }
         }
     }
 
