@@ -548,6 +548,26 @@ namespace binFileMerger
             metadata.Save(newMetadataPath);
         }
         //--------------------------------------------------------------------------------
+        private void CheckSchemaName(string newSchemaName)
+        {
+            XmlDocument metadata = new XmlDocument();
+            string newMetadataPath = Path.Combine(siardFolderOutput, "header", "metadata.xml");
+            metadata.Load(newMetadataPath);
+
+            var nsmgr = new XmlNamespaceManager(metadata.NameTable);
+            var nameSpace = metadata.DocumentElement.NamespaceURI;
+            nsmgr.AddNamespace("ns", nameSpace);
+
+            string query = "descendant::ns:schema/ns:name";
+            XmlNode root = metadata.DocumentElement;
+            XmlNode schemaNameNode = root.SelectSingleNode(query, nsmgr);
+
+            if (!String.IsNullOrEmpty(newSchemaName))
+                schemaNameNode.InnerText = newSchemaName;
+
+            metadata.Save(newMetadataPath);
+        }
+        //--------------------------------------------------------------------------------
         // Creates a new filename which includes the number of files the new file consists of.
         #region FileNameChanger
         public string FileNameChanger(string folder, string oldName, int fileCounter)
