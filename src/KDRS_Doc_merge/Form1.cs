@@ -225,6 +225,11 @@ namespace binFileMerger
                     }
                 }
             }
+
+            string newSchemaName = txtSchemaName.Text;
+            if (!String.IsNullOrEmpty(newSchemaName))
+                CheckSchemaName(newSchemaName);
+
             backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
             backgroundWorker1.ReportProgress(0, "\r\nLOB tables = " + countTableLob);
             backgroundWorker1.ReportProgress(0, "\r\nTotal number of tables = " + (countTableStd + countTableLob));
@@ -543,9 +548,13 @@ namespace binFileMerger
             XmlNode root = metadata.DocumentElement;
             XmlNode rowsNode = root.SelectSingleNode(query, nsmgr);
 
-            rowsNode.InnerText = rows.ToString();
+            //rowsNode.InnerText = rows.ToString();
 
-            metadata.Save(newMetadataPath);
+            XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
+            XmlWriter writer = XmlWriter.Create(newMetadataPath, settings);
+
+            metadata.Save(writer);
+            writer.Close();
         }
         //--------------------------------------------------------------------------------
         private void CheckSchemaName(string newSchemaName)
@@ -562,10 +571,14 @@ namespace binFileMerger
             XmlNode root = metadata.DocumentElement;
             XmlNode schemaNameNode = root.SelectSingleNode(query, nsmgr);
 
-            if (!String.IsNullOrEmpty(newSchemaName))
-                schemaNameNode.InnerText = newSchemaName;
+            schemaNameNode.InnerText = newSchemaName;
+            Console.WriteLine("New schema name: " + newSchemaName);
 
-            metadata.Save(newMetadataPath);
+            XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
+            XmlWriter writer = XmlWriter.Create(newMetadataPath, settings);
+
+            metadata.Save(writer);
+            writer.Close();
         }
         //--------------------------------------------------------------------------------
         // Creates a new filename which includes the number of files the new file consists of.
@@ -863,7 +876,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.3";
+        public static readonly String toolVersion = "0.3.4";
 
         public static int countFiles = 0;
 
