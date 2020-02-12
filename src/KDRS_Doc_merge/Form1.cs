@@ -548,7 +548,7 @@ namespace binFileMerger
             XmlNode root = metadata.DocumentElement;
             XmlNode rowsNode = root.SelectSingleNode(query, nsmgr);
 
-            //rowsNode.InnerText = rows.ToString();
+            rowsNode.InnerText = rows.ToString();
 
             XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
             XmlWriter writer = XmlWriter.Create(newMetadataPath, settings);
