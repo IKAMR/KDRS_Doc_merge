@@ -453,7 +453,7 @@ namespace binFileMerger
 
                 // Debug
                 if (Globals.limitFilesMode)
-                    if (Globals.limitFilesNumber >= counter)
+                    if (Globals.limitFilesNumber <= counter)
                         break;
             }
 
