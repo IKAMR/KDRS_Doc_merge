@@ -32,6 +32,8 @@ namespace binFileMerger
             {
                 Console.WriteLine("Creating .siard");
                 proc.Start();
+                proc.WaitForExit();
+
                 Console.WriteLine(".siard Created");
             }
             catch
