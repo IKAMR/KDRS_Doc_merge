@@ -879,7 +879,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.4";
+        public static readonly String toolVersion = "0.3.5";
 
         public static int countFiles = 0;
 
