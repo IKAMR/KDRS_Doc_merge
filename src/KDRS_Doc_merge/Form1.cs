@@ -77,7 +77,7 @@ namespace binFileMerger
             {
                 if (File.Exists(zip64jar))
                 {
-                    textBox1.AppendText("\r\nUnzipping .siard file");
+                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while)!");
                     filesAdded = true;
 
                     string siardNameInput = "siard_structure_input";
@@ -237,7 +237,9 @@ namespace binFileMerger
             if (chkBxMakeSiard.Checked)
             {
                 string targetFolderName = Path.GetFileName(targetFolder);
-                string zipName = Path.Combine(targetFolder, targetFolderName); 
+                string zipName = Path.Combine(targetFolder, targetFolderName);
+                textBox1.AppendText("\r\nCreating the .siard file (may take a while)!");
+
                 zipper.SiardZip(siardFolderOutput, zipName, zip64jar);
             }
         }
@@ -255,6 +257,7 @@ namespace binFileMerger
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             textBox1.AppendText("\r\n\r\nJob complete");
+            textBox1.AppendText("\r\n\r\nTarget folder location: \r\n " + targetFolder);
 
             // Save logfile
             string logFile = Path.Combine(targetFolder, "kdrs-doc-merge_log_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
