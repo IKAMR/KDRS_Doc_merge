@@ -77,7 +77,7 @@ namespace binFileMerger
             {
                 if (File.Exists(zip64jar))
                 {
-                    textBox1.AppendText("\r\nUnzipping .siard file");
+                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while)!");
                     filesAdded = true;
 
                     string siardNameInput = "siard_structure_input";
@@ -225,6 +225,11 @@ namespace binFileMerger
                     }
                 }
             }
+
+            string newSchemaName = txtSchemaName.Text;
+            if (!String.IsNullOrEmpty(newSchemaName))
+                CheckSchemaName(newSchemaName);
+
             backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
             backgroundWorker1.ReportProgress(0, "\r\nLOB tables = " + countTableLob);
             backgroundWorker1.ReportProgress(0, "\r\nTotal number of tables = " + (countTableStd + countTableLob));
@@ -232,7 +237,9 @@ namespace binFileMerger
             if (chkBxMakeSiard.Checked)
             {
                 string targetFolderName = Path.GetFileName(targetFolder);
-                string zipName = Path.Combine(targetFolder, targetFolderName); 
+                string zipName = Path.Combine(targetFolder, targetFolderName);
+                textBox1.AppendText("\r\nCreating the .siard file (may take a while)!");
+
                 zipper.SiardZip(siardFolderOutput, zipName, zip64jar);
             }
         }
@@ -250,6 +257,7 @@ namespace binFileMerger
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             textBox1.AppendText("\r\n\r\nJob complete");
+            textBox1.AppendText("\r\n\r\nTarget folder location: \r\n " + targetFolder);
 
             // Save logfile
             string logFile = Path.Combine(targetFolder, "kdrs-doc-merge_log_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
@@ -445,7 +453,7 @@ namespace binFileMerger
 
                 // Debug
                 if (Globals.limitFilesMode)
-                    if (Globals.limitFilesNumber >= counter)
+                    if (Globals.limitFilesNumber <= counter)
                         break;
             }
 
@@ -545,7 +553,35 @@ namespace binFileMerger
 
             rowsNode.InnerText = rows.ToString();
 
-            metadata.Save(newMetadataPath);
+            XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
+            XmlWriter writer = XmlWriter.Create(newMetadataPath, settings);
+
+            metadata.Save(writer);
+            writer.Close();
+        }
+        //--------------------------------------------------------------------------------
+        private void CheckSchemaName(string newSchemaName)
+        {
+            XmlDocument metadata = new XmlDocument();
+            string newMetadataPath = Path.Combine(siardFolderOutput, "header", "metadata.xml");
+            metadata.Load(newMetadataPath);
+
+            var nsmgr = new XmlNamespaceManager(metadata.NameTable);
+            var nameSpace = metadata.DocumentElement.NamespaceURI;
+            nsmgr.AddNamespace("ns", nameSpace);
+
+            string query = "descendant::ns:schema/ns:name";
+            XmlNode root = metadata.DocumentElement;
+            XmlNode schemaNameNode = root.SelectSingleNode(query, nsmgr);
+
+            schemaNameNode.InnerText = newSchemaName;
+            Console.WriteLine("New schema name: " + newSchemaName);
+
+            XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
+            XmlWriter writer = XmlWriter.Create(newMetadataPath, settings);
+
+            metadata.Save(writer);
+            writer.Close();
         }
         //--------------------------------------------------------------------------------
         // Creates a new filename which includes the number of files the new file consists of.
@@ -843,7 +879,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.3";
+        public static readonly String toolVersion = "0.3.4";
 
         public static int countFiles = 0;
 
