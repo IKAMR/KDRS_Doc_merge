@@ -255,7 +255,7 @@ namespace binFileMerger
             string logFile = Path.Combine(targetFolder, "kdrs-doc-merge_log_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
             try
             {
-                File.AppendAllText(logFile, targetFolder);
+                File.AppendAllText(logFile, textBox1.Text);
             }
             catch
             {
