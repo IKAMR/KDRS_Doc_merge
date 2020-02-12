@@ -46,7 +46,7 @@ namespace binFileMerger
         private void btnRunMerge_Click(object sender, EventArgs e)
         {
             Globals.testMode = false;
-            textBox1.Text = "Start file merge";
+            textBox1.Text = "Start file merge: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm");
             try
             {
                 InitDocMerge();
@@ -77,7 +77,7 @@ namespace binFileMerger
             {
                 if (File.Exists(zip64jar))
                 {
-                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while)!");
+                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while): " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
                     filesAdded = true;
 
                     string siardNameInput = "siard_structure_input";
@@ -108,6 +108,8 @@ namespace binFileMerger
 
             if (filesAdded)
             {
+                textBox1.Text = "Starting prosessing siard structure: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm");
+
                 if (!Globals.testMode)
                     Directory.CreateDirectory(siardFolderOutput);
 
@@ -238,7 +240,7 @@ namespace binFileMerger
             {
                 string targetFolderName = Path.GetFileName(targetFolder);
                 string zipName = Path.Combine(targetFolder, targetFolderName);
-                textBox1.AppendText("\r\nCreating the .siard file (may take a while)!");
+                textBox1.AppendText("\r\nCreating the .siard file (may take a while): " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
 
                 zipper.SiardZip(siardFolderOutput, zipName, zip64jar);
             }
@@ -256,7 +258,7 @@ namespace binFileMerger
         //--------------------------------------------------------------------------------
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            textBox1.AppendText("\r\n\r\nJob complete");
+            textBox1.AppendText("\r\n\r\nJob complete: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
             textBox1.AppendText("\r\n\r\nTarget folder location: \r\n " + targetFolder);
 
             // Save logfile
@@ -862,7 +864,7 @@ namespace binFileMerger
         private void btnTest_Click(object sender, EventArgs e)
         {
             Globals.testMode = true;
-            textBox1.Text = "Start testmode";
+            textBox1.Text = "Start testmode: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm");
             try
             {
                 InitDocMerge();
