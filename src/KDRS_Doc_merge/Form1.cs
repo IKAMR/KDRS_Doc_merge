@@ -108,7 +108,7 @@ namespace binFileMerger
 
             if (filesAdded)
             {
-                textBox1.Text = "Starting prosessing siard structure: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm");
+                textBox1.AppendText("\r\nStarting prosessing siard structure: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
 
                 if (!Globals.testMode)
                     Directory.CreateDirectory(siardFolderOutput);
@@ -881,7 +881,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.5";
+        public static readonly String toolVersion = "0.3.6";
 
         public static int countFiles = 0;
 
