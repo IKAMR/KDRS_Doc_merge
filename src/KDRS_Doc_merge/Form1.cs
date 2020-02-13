@@ -46,7 +46,7 @@ namespace binFileMerger
         private void btnRunMerge_Click(object sender, EventArgs e)
         {
             Globals.testMode = false;
-            textBox1.Text = "Start file merge: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm");
+            textBox1.Text = "Start file merge: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
             try
             {
                 InitDocMerge();
@@ -77,7 +77,7 @@ namespace binFileMerger
             {
                 if (File.Exists(zip64jar))
                 {
-                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while): " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
+                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                     filesAdded = true;
 
                     string siardNameInput = "siard_structure_input";
@@ -108,7 +108,7 @@ namespace binFileMerger
 
             if (filesAdded)
             {
-                textBox1.AppendText("\r\nStarting prosessing siard structure: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
+                textBox1.AppendText("\r\nStarting prosessing siard structure: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
 
                 if (!Globals.testMode)
                     Directory.CreateDirectory(siardFolderOutput);
@@ -132,6 +132,11 @@ namespace binFileMerger
             string tempString2;
             int countTableStd = 0;
             int countTableLob = 0;
+
+            // Debug
+            Globals.textBox1_fixed = "DEBUG FIXED";
+            Globals.textBox1_temp = "DEBUG TEMP";
+            
 
             if (!Globals.testMode)
             {
@@ -157,6 +162,7 @@ namespace binFileMerger
                 doMergeFiles = false;
                 hasLob = false;
                 inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
+                backgroundWorker1.ReportProgress(-1, table.TableNameDb + " | " + table.TableNameDb);
 
                 if (!String.IsNullOrEmpty(table.LobPath))
                 {
@@ -170,12 +176,18 @@ namespace binFileMerger
                     if (String.Equals("POSTKASSE", tempString))
                     {
                         Console.WriteLine("Match POSTKASSE: " + table.TableNameDb);
+                        backgroundWorker1.ReportProgress(-2, "\r\nLOB, Match POSTKASSE: " + table.TableNameDb);
                         doMergeFiles = true;
                     }
                     else if (String.Equals("DGDOKLAGER", tempString.Substring(0, 10)))
                     {
                         Console.WriteLine("Match DGDOKLAGERn: " + table.TableNameDb);
+                        backgroundWorker1.ReportProgress(-2, "\r\nLOB, Match DGDOKLAGERn: " + table.TableNameDb);
                         doMergeFiles = true;
+                    }
+                    else
+                    {
+                        backgroundWorker1.ReportProgress(-2, "\r\nLOB, but no match for file merge");
                     }
                 }
 
@@ -190,11 +202,14 @@ namespace binFileMerger
                         backgroundWorker1.ReportProgress(0, " |");
                     if (!Globals.testMode)
                     {
+                        backgroundWorker1.ReportProgress(-2, "\r\nStart LOB merge");
                         string newTablePath = Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName);
                         DirectoryCopy(table.TableFilePath, newTablePath);
                         SchemaNameControl(newTablePath);
                         backgroundWorker1.ReportProgress(0, " copied");
                     }
+                    else
+                        backgroundWorker1.ReportProgress(-2, "\r\nLOB merge skipped (testmode)");
                 }
                 else
                 {
@@ -225,13 +240,17 @@ namespace binFileMerger
                         }
                         // backgroundWorker1.ReportProgress(0, " merged");
                     }
-                }
+                        backgroundWorker1.ReportProgress(-2, "\r\nTable copy skipped (testmode)");
+                }                
             }
 
             string newSchemaName = txtSchemaName.Text;
             if (!String.IsNullOrEmpty(newSchemaName))
                 CheckSchemaName(newSchemaName);
 
+            backgroundWorker1.ReportProgress(-1, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+
+            backgroundWorker1.ReportProgress(0, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
             backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
             backgroundWorker1.ReportProgress(0, "\r\nLOB tables = " + countTableLob);
             backgroundWorker1.ReportProgress(0, "\r\nTotal number of tables = " + (countTableStd + countTableLob));
@@ -240,7 +259,7 @@ namespace binFileMerger
             {
                 string targetFolderName = Path.GetFileName(targetFolder);
                 string zipName = Path.Combine(targetFolder, targetFolderName);
-                textBox1.AppendText("\r\nCreating the .siard file (may take a while): " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
+                backgroundWorker1.ReportProgress(0, "\r\nCreating the .siard file (may take a while): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
 
                 zipper.SiardZip(siardFolderOutput, zipName, zip64jar);
             }
@@ -248,17 +267,32 @@ namespace binFileMerger
         //--------------------------------------------------------------------------------
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            progressBar1.Value = e.ProgressPercentage;
+            string textBox1_temp = "";
+            
             //Console.WriteLine("Progress: " + e.ProgressPercentage);
             if (e.UserState != null)
             {
-                textBox1.AppendText(e.UserState.ToString());
+                if (-1 < e.ProgressPercentage)
+                {
+                    progressBar1.Value = e.ProgressPercentage;
+                    textBox1.AppendText(e.UserState.ToString());
+                }
+                else if (-1 == e.ProgressPercentage)
+                {
+                    // -1 : Write value to temporary log
+                    textBox2.Text = e.UserState.ToString();
+                }
+                else if (-2 == e.ProgressPercentage)
+                {
+                    // -2 : Append value to temporary log
+                    textBox2.AppendText(e.UserState.ToString());
+                }
             }
         }
         //--------------------------------------------------------------------------------
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            textBox1.AppendText("\r\n\r\nJob complete: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm"));
+            textBox1.AppendText("\r\n\r\nJob complete: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
             textBox1.AppendText("\r\n\r\nTarget folder location: \r\n " + targetFolder);
 
             // Save logfile
@@ -646,7 +680,7 @@ namespace binFileMerger
 
             txtInputFile.Text = "";
             txtTargetFolder.Text = "";
-            txtZip64Jar.Text = "";
+            // txtZip64Jar.Text = "";
 
             if (xmlWriter != null)
                 xmlWriter.Close();
@@ -864,7 +898,7 @@ namespace binFileMerger
         private void btnTest_Click(object sender, EventArgs e)
         {
             Globals.testMode = true;
-            textBox1.Text = "Start testmode: " + DateTime.Now.ToString("yyyy - MM - dd - HHmm");
+            textBox1.Text = "Start testmode: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
             try
             {
                 InitDocMerge();
@@ -881,7 +915,10 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.6";
+        public static readonly String toolVersion = "0.3.7 rc1 taa";
+
+        public static string textBox1_fixed = "";
+        public static string textBox1_temp = "";
 
         public static int countFiles = 0;
 
