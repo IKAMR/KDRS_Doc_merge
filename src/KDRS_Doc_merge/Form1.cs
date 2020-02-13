@@ -13,7 +13,6 @@ namespace binFileMerger
 {
     public partial class Form1 : Form
     {
-        string csvFileName;
         string targetFolder;
         string siardFolderOutput;
         string sourceFolder;
@@ -60,6 +59,10 @@ namespace binFileMerger
         //--------------------------------------------------------------------------------
         private void InitDocMerge()
         {
+            log.Clear();
+            textBox1.Text = "";
+            textBox2.Text = "";
+
             targetFolder = txtTargetFolder.Text;
             string siardNameOutput = "siard_structure_output";
             siardFolderOutput = Path.Combine(targetFolder, siardNameOutput);
@@ -162,7 +165,7 @@ namespace binFileMerger
                 doMergeFiles = false;
                 hasLob = false;
                 inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
-                backgroundWorker1.ReportProgress(-1, table.TableNameDb + " | " + table.TableNameDb);
+                backgroundWorker1.ReportProgress(-2, table.TableNameDb + " | " + table.TableNameDb);
 
                 if (!String.IsNullOrEmpty(table.LobPath))
                 {
@@ -197,9 +200,9 @@ namespace binFileMerger
                     Console.WriteLine("Copy table: " + table.TableFileName  +" | "+ table.TableNameDb);
                     backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb);
                     if (hasLob)
-                        backgroundWorker1.ReportProgress(0, " | LOB");
+                        backgroundWorker1.ReportProgress(0, " | LOB " + lobs.Count + " rows");
                     else
-                        backgroundWorker1.ReportProgress(0, " |");
+                        backgroundWorker1.ReportProgress(0, " | " + lobs.Count + " rows");
                     if (!Globals.testMode)
                     {
                         backgroundWorker1.ReportProgress(-2, "\r\nStart LOB merge");
@@ -216,7 +219,7 @@ namespace binFileMerger
                     countTableLob++;
                     Console.WriteLine("LOB table: " + table.TableNameDb);
                     Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
-                    backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | LOB");
+                    backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | LOB " + lobs.Count + " rows");
                     if (!Globals.testMode)
                     {
                         Directory.CreateDirectory(Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName));
@@ -224,7 +227,13 @@ namespace binFileMerger
                         ReadTableXml(table);
                         CreateTableXML(table);
 
-                        TableMerge(table.TableFileName);
+                        if (lobs.Count > 0)
+                        {
+                            backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + lobs.Count  + " rows");
+                            TableMerge(table.TableFileName);
+                        }
+                        else
+                            backgroundWorker1.ReportProgress(-2, "\r\nLOB table have 0 rows");
 
                         string tableXSDFilePath = Path.Combine(table.TableFilePath, table.TableFileName + ".xsd");
                         string newXsdFilePath = Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
@@ -240,6 +249,7 @@ namespace binFileMerger
                         }
                         // backgroundWorker1.ReportProgress(0, " merged");
                     }
+                    else
                         backgroundWorker1.ReportProgress(-2, "\r\nTable copy skipped (testmode)");
                 }                
             }
@@ -248,7 +258,7 @@ namespace binFileMerger
             if (!String.IsNullOrEmpty(newSchemaName))
                 CheckSchemaName(newSchemaName);
 
-            backgroundWorker1.ReportProgress(-1, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+            backgroundWorker1.ReportProgress(-2, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
 
             backgroundWorker1.ReportProgress(0, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
             backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
@@ -430,6 +440,7 @@ namespace binFileMerger
                     {
                         string lobFileName = Path.Combine("seg", "lobRec" + lobCount + ".bin");
                         newFileName = FileNameChanger(lob.LobFolder, lobFileName, fileCount);
+                        // backgroundWorker1.ReportProgress(-2, "\r\nBinMergeLob(" + newFileName + ") = lob: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                         BinMergeLob(mergeLobs, newFileName);
                         lobCount++;
 
@@ -439,6 +450,7 @@ namespace binFileMerger
                     else
                     {
                         newFileName = FileNameChanger(lob.LobFolder, mergeLobs[0].LobString, fileCount);
+                        // backgroundWorker1.ReportProgress(-2, "\r\nBinMergeLob(" + newFileName + ") <> lob: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                         BinMergeLob(mergeLobs, newFileName);
 
                         AddXMLFileInfo(prevFileID, newFileName);
@@ -450,7 +462,6 @@ namespace binFileMerger
                     prevFileID = lob.FileId;
                     prevLobType = lob.LobType;
                     prevFileCount = lob.FileCount;
-
                 }
                 mergeLobs.Add(lob);
                 fileCount++;
@@ -461,9 +472,10 @@ namespace binFileMerger
                 {
                     if (lob.LobType == "lob" && lob.FileCount == 1)
                     {
-                        // inline xml data
+                        // XML Inline Content LOB value
                         string lobFileName = Path.Combine("seg", "lobRec" + lobCount + ".bin");
                         newFileName = FileNameChanger(lob.LobFolder, lobFileName, fileCount);
+                        // backgroundWorker1.ReportProgress(-2, "\r\nBinMergeLob(" + newFileName + ") = lob (last): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                         BinMergeLob(mergeLobs, newFileName);
                         lobCount++;
 
@@ -473,8 +485,9 @@ namespace binFileMerger
                     }
                     else
                     {
-                        // file referred by attribute
+                        // XML File Attribute file = filepath LOB
                         newFileName = FileNameChanger(lob.LobFolder, mergeLobs[0].LobString, fileCount);
+                        // backgroundWorker1.ReportProgress(-2, "\r\nBinMergeLob(" + newFileName + ") <> lob (last): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                         BinMergeLob(mergeLobs, newFileName);
 
                         AddXMLFileInfo(fileID, newFileName);
@@ -517,7 +530,9 @@ namespace binFileMerger
                 {
                     if (lob.LobType == "lob")
                     {
-                        log.Add(lob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + lobs.Count + ";" + "oldSeg" + ";" + lob.LobString);
+                        // XML Inline Content LOB value
+                        // log.Add(lob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + lobs.Count + ";" + "oldSeg" + ";" + lob.LobString);
+                        log.Add(lob.FileId + ";" + outFileName + ";" + lob.LobString);
                         byte[] byteArray = Encoding.ASCII.GetBytes(lob.LobString);
                         using (var inputstream = new MemoryStream(byteArray))
                         {
@@ -526,7 +541,9 @@ namespace binFileMerger
                     }
                     else
                     {
-                        log.Add(lob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + lobs.Count + ";" + "oldSeg" + ";" + lob.LobString);
+                        // XML File Attribute file = filepath LOB
+                        // log.Add(lob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + lobs.Count + ";" + "oldSeg" + ";" + lob.LobString);
+                        log.Add(lob.FileId + ";" + outFileName + ";" + lob.LobString);
                         using (var inputStream = File.OpenRead(lob.LobPath))
                         {
                             inputStream.CopyTo(outputStream);
@@ -670,8 +687,8 @@ namespace binFileMerger
             targetFolder = null;
 
             siardFolderOutput = null;
-            csvFileName = null;
 
+            log.Clear();
             lobs.Clear();
             metadataXmlName = null;
 
@@ -703,7 +720,6 @@ namespace binFileMerger
             textBox1.Clear();
 
             /* listBox1.Items.Clear();
-            listBox1.Items.Add("csv file: " + csvFileName);
 
             listBox1.Items.Add("Source folder: " + sourceFolder);
             listBox1.Items.Add("Destination folder: " + siardFolderOutput);
