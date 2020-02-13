@@ -166,7 +166,7 @@ namespace binFileMerger
                 doMergeFiles = false;
                 hasLob = false;
                 inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
-                backgroundWorker1.ReportProgress(-2, "\r\n" + table.TableNameDb + " | " + table.TableNameDb);
+                backgroundWorker1.ReportProgress(-2, "\r\n" + table.TableNameDb + " | " + table.TableNameDb + " | Start: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
 
                 if (!String.IsNullOrEmpty(table.LobPath))
                 {
@@ -180,18 +180,18 @@ namespace binFileMerger
                     if (String.Equals("POSTKASSE", tempString))
                     {
                         Console.WriteLine("Match POSTKASSE: " + table.TableNameDb);
-                        backgroundWorker1.ReportProgress(-2, "\r\nLOB, Match POSTKASSE: " + table.TableNameDb);
+                        backgroundWorker1.ReportProgress(-2, "\r\n  >>> LOB, Match POSTKASSE: " + table.TableNameDb);
                         doMergeFiles = true;
                     }
                     else if (String.Equals("DGDOKLAGER", tempString.Substring(0, 10)))
                     {
                         Console.WriteLine("Match DGDOKLAGERn: " + table.TableNameDb);
-                        backgroundWorker1.ReportProgress(-2, "\r\nLOB, Match DGDOKLAGERn: " + table.TableNameDb);
+                        backgroundWorker1.ReportProgress(-2, "\r\n  >>> LOB, Match DGDOKLAGERn: " + table.TableNameDb);
                         doMergeFiles = true;
                     }
                     else
                     {
-                        backgroundWorker1.ReportProgress(-2, "\r\nLOB, but no match for file merge");
+                        backgroundWorker1.ReportProgress(-2, "\r\n  >>> LOB, but no match for file merge");
                     }
                 }
 
@@ -206,14 +206,14 @@ namespace binFileMerger
                         backgroundWorker1.ReportProgress(0, " | " + table.TableRows + " rows");
                     if (!Globals.testMode)
                     {
-                        backgroundWorker1.ReportProgress(-2, "\r\nStart LOB merge");
+                        backgroundWorker1.ReportProgress(-2, ", copy");
                         string newTablePath = Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName);
                         DirectoryCopy(table.TableFilePath, newTablePath);
                         SchemaNameControl(newTablePath);
-                        backgroundWorker1.ReportProgress(0, " copied");
+                        backgroundWorker1.ReportProgress(-2, " - copied: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                     }
                     else
-                        backgroundWorker1.ReportProgress(-2, "\r\nLOB merge skipped (testmode)");
+                        backgroundWorker1.ReportProgress(-2, ", LOB merge skipped (testmode): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                 }
                 else
                 {
@@ -221,6 +221,7 @@ namespace binFileMerger
                     Console.WriteLine("LOB table: " + table.TableNameDb);
                     Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
                     backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | LOB " + table.TableRows + " rows");
+                    backgroundWorker1.ReportProgress(-2, ", " + table.TableRows + " rows");
                     if (!Globals.testMode)
                     {
                         Directory.CreateDirectory(Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName));
@@ -232,12 +233,11 @@ namespace binFileMerger
 
                         if (lobs.Count > 0)
                         {
-                            log.Add("Id;Name;Size;Inline");
-                            backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + table.TableRows + " ?=? " + lobs.Count + " rows");
+                            log.Add("Id;Name;Size;Inline");                            
                             TableMerge(table.TableFileName);
                         }
-                        else
-                            backgroundWorker1.ReportProgress(-2, "\r\nLOB table have 0 rows");
+                        // else
+                            // backgroundWorker1.ReportProgress(-2, ", 0 rows");
 
                         string tableXSDFilePath = Path.Combine(table.TableFilePath, table.TableFileName + ".xsd");
                         string newXsdFilePath = Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName, table.TableFileName + ".xsd");
@@ -254,7 +254,7 @@ namespace binFileMerger
                         // backgroundWorker1.ReportProgress(0, " merged");
                     }
                     else
-                        backgroundWorker1.ReportProgress(-2, "\r\nTable copy skipped (testmode)");
+                        backgroundWorker1.ReportProgress(-2, ", Table copy skipped (testmode): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                 }                
             }
 
@@ -562,6 +562,7 @@ namespace binFileMerger
             // backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files from " + prevFileCount + " rows");
             backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files");
             // backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " (" + countFileInline + " from inline, " + countFileLob + " lob)");
+            backgroundWorker1.ReportProgress(-2, ", merged into " + counter + " files: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
         }
         //--------------------------------------------------------------------------------
         // Merges contents of the input list to a file with name 'outFileName'.
@@ -997,7 +998,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.7 rc1 taa";
+        public static readonly String toolVersion = "0.3.7";
 
         public static string textBox1_fixed = "";
         public static string textBox1_temp = "";
