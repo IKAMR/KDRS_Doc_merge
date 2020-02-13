@@ -59,12 +59,14 @@ namespace binFileMerger
                 string schema = table.ParentNode.ParentNode["folder"].InnerText.ToString();
                 string tableName = getNodeText(table, "ns:folder", nsmgr);
                 string tableNameDb = getNodeText(table, "ns:name", nsmgr);
+                long tableRows = getNodeInt(table, "ns:rows", nsmgr);
 
                 // TAA must be changed to (from tableNameDb and tableName)
                 //      tableName == database name, f. ex. "files" 
                 //      tableFolder == SIARD folder for the table, f. ex. "table2"
-                // TAA: Added tableNameDb as first element = the name of the table in the database
-                tableList.Add(new SiardTableXml(tableName, lobpath, schema, Path.Combine(metaGrandParent, lobFolder, schema, tableName), tableNameDb));
+                // TAA: Appended tableNameDb as element = the name of the table in the database
+                // TAA: Appended tableRows as element = number of rows in the table
+                tableList.Add(new SiardTableXml(tableName, lobpath, schema, Path.Combine(metaGrandParent, lobFolder, schema, tableName), tableNameDb, tableRows));
             }
             /*
             foreach (XmlNode node in liste)
@@ -104,16 +106,31 @@ namespace binFileMerger
             }
             return varText;
         }
+        //--------------------------------------------------------------------------------
+        // Returns number in the queried node.
+        private long getNodeInt(XmlNode table, string query, XmlNamespaceManager nsmgr)
+        {
+            long varText = 0;
+            if (table != null)
+            {
+                XmlNode node = table.SelectSingleNode(query, nsmgr);
+                if (node != null)
+                {
+                    varText = Convert.ToInt64(node.InnerText);
+                }
+            }
+            return varText;
+        }
     }
-
 
     //--------------------------------------------------------------------------------
 
     public class SiardTableXml
     {
-        public SiardTableXml(string tableFileName, string lobPath, string tableSchema, string tableFilePath, string tableNameDb)
+        public SiardTableXml(string tableFileName, string lobPath, string tableSchema, string tableFilePath, string tableNameDb, long tableRows)
         {
             TableNameDb = tableNameDb;
+            TableRows = tableRows;
             TableFileName = tableFileName;
             LobPath = lobPath;
             TableSchema = tableSchema;
@@ -121,6 +138,7 @@ namespace binFileMerger
         }
 
         public string TableNameDb { get; set; }
+        public long TableRows { get; set; }
         public string TableFileName { get; set;}
         public string LobPath { get; set; }
         public string TableSchema { get; set; }

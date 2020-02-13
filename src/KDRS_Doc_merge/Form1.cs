@@ -200,9 +200,9 @@ namespace binFileMerger
                     Console.WriteLine("Copy table: " + table.TableFileName  +" | "+ table.TableNameDb);
                     backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb);
                     if (hasLob)
-                        backgroundWorker1.ReportProgress(0, " | LOB " + lobs.Count + " rows");
+                        backgroundWorker1.ReportProgress(0, " | LOB " + table.TableRows + " rows");
                     else
-                        backgroundWorker1.ReportProgress(0, " | " + lobs.Count + " rows");
+                        backgroundWorker1.ReportProgress(0, " | " + table.TableRows + " rows");
                     if (!Globals.testMode)
                     {
                         backgroundWorker1.ReportProgress(-2, "\r\nStart LOB merge");
@@ -219,17 +219,19 @@ namespace binFileMerger
                     countTableLob++;
                     Console.WriteLine("LOB table: " + table.TableNameDb);
                     Console.WriteLine(table.TableFileName + " " + table.LobPath + " " + table.TableSchema + " " + table.TableFilePath);
-                    backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | LOB " + lobs.Count + " rows");
+                    backgroundWorker1.ReportProgress(0, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | LOB " + table.TableRows + " rows");
                     if (!Globals.testMode)
                     {
                         Directory.CreateDirectory(Path.Combine(siardFolderOutput, finder.lobFolder, table.TableSchema, table.TableFileName));
 
                         ReadTableXml(table);
+                        backgroundWorker1.ReportProgress(0, " " + lobs.Count + " rows");
+
                         CreateTableXML(table);
 
                         if (lobs.Count > 0)
                         {
-                            backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + lobs.Count  + " rows");
+                            backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + table.TableRows + " ?=? " + lobs.Count + " rows");
                             TableMerge(table.TableFileName);
                         }
                         else
