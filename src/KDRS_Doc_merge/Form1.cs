@@ -232,7 +232,7 @@ namespace binFileMerger
 
                         if (lobs.Count > 0)
                         {
-                            log.Add("filid;output;filref_or_inline;size");
+                            log.Add("Id;Name;Size;Inline");
                             backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + table.TableRows + " ?=? " + lobs.Count + " rows");
                             TableMerge(table.TableFileName);
                         }
@@ -461,6 +461,10 @@ namespace binFileMerger
 
                         AddXMLFileInfo(prevFileID, newFileName);
                         counter++;
+
+                        // A single Inline XML file created
+                        // log.Add(lob.FileId + ";" + lob.LobFolder + "/" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
+                        log.Add(lob.FileId + ";" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
                     }
                     else
                     {
@@ -470,6 +474,13 @@ namespace binFileMerger
 
                         AddXMLFileInfo(prevFileID, newFileName);
                         counter++;
+
+                        // A LOB File merge completed
+                        FileInfo fi = new FileInfo(newFileName);
+                        long fileLength = fi.Length;
+
+                        // backgroundWorker1.ReportProgress(-2, "\r\nFolder = " + lob.LobFolder + "\r\nFile = " + mergeLobs[0].LobString);
+                        log.Add(lob.FileId + ";" + mergeLobs[0].LobString + ";" + fileLength + ";");
                     }
 
                     mergeLobs.Clear();
@@ -496,7 +507,11 @@ namespace binFileMerger
 
                         AddXMLFileInfo(fileID, newFileName);
                         counter++;
-                        // countFileInline++;                        
+                        // countFileInline++;
+
+                        // A single Inline XML file created
+                        // log.Add(lob.FileId + ";" + lob.LobFolder + "/" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
+                        log.Add(lob.FileId + ";" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
                     }
                     else
                     {
@@ -508,6 +523,19 @@ namespace binFileMerger
                         AddXMLFileInfo(fileID, newFileName);
                         counter++;
                         // countFileLob++;
+
+                        // A LOB File merge completed
+                        FileInfo fi = new FileInfo(newFileName);
+                        long fileLength = fi.Length;
+
+                        // string fileName = Path.GetFileName(outFileName);
+                        // string fileFolder1 = Path.GetFileName(Path.GetDirectoryName(outFileName));
+                        // string fileFolder2 = Path.GetFileName(Path.GetDirectoryName(fileFolder1));
+                        //string fileFolder3 = Path.GetFileName(Path.GetDirectoryName(fileFolder2));
+                        //string fileFolder4 = Path.GetFileName(Path.GetDirectoryName(fileFolder3));
+
+                        // backgroundWorker1.ReportProgress(-2, "\r\nFolder = " + lob.LobFolder + "\r\nFile = " + mergeLobs[0].LobString);
+                        log.Add(lob.FileId + ";" + mergeLobs[0].LobString + ";" + fileLength + ";");                        
                     }
                 }
                 progressCount++;
@@ -543,19 +571,25 @@ namespace binFileMerger
             {                
                 foreach (Lob lob in lobsToMerge)
                 {
+                    /*
                     // string fileName = Path.Combine(Path.GetDirectoryName(outFileName), Path.GetFileName(outFileName));
                     string fileName = Path.GetFileName(outFileName);
                     string fileFolder1 = Path.GetFileName(Path.GetDirectoryName(outFileName));
                     string fileFolder2 = Path.GetFileName(Path.GetDirectoryName(fileFolder1));
                     //string fileFolder3 = Path.GetFileName(Path.GetDirectoryName(fileFolder2));
                     //string fileFolder4 = Path.GetFileName(Path.GetDirectoryName(fileFolder3));
+                    */
 
                     if (lob.LobType == "lob")
                     {
                         // XML Inline Content LOB value                        
+
+                        /*
                         // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes);" + fileLength);
                         // log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes);" + fileLength);
                         log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML;" + lob.LobString.Length);
+                        */
+
                         byte[] byteArray = Encoding.ASCII.GetBytes(lob.LobString);
                         using (var inputstream = new MemoryStream(byteArray))
                         {
@@ -566,12 +600,15 @@ namespace binFileMerger
                     {
                         // XML File Attribute file = filepath LOB
 
+                        /*
                         FileInfo fi = new FileInfo(outFileName);
                         long fileLength = fi.Length;
                         // backgroundWorker1.ReportProgress(-2, "\r\n" + outFileName + ", size = " + fileLength);
 
                         // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString + ";" + fileLength);
                         log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString + ";" + fileLength);
+                        */
+
                         using (var inputStream = File.OpenRead(lob.LobPath))
                         {
                             inputStream.CopyTo(outputStream);
