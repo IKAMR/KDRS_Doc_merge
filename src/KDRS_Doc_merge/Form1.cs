@@ -291,12 +291,12 @@ namespace binFileMerger
                 }
                 else if (-1 == e.ProgressPercentage)
                 {
-                    // -1 : Write value to temporary log
+                    // -1 : Write value to temporary info
                     textBox2.Text = e.UserState.ToString();
                 }
                 else if (-2 == e.ProgressPercentage)
                 {
-                    // -2 : Append value to temporary log
+                    // -2 : Append value to temporary info
                     textBox2.AppendText(e.UserState.ToString());
                 }
             }
@@ -316,6 +316,17 @@ namespace binFileMerger
             catch
             {
                 throw new Exception("Unable to create log file");
+            }
+
+            // Save debug logfile
+            string debugFile = Path.Combine(targetFolder, "kdrs-doc-merge_debug_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
+            try
+            {
+                File.AppendAllText(debugFile, textBox2.Text);
+            }
+            catch
+            {
+                throw new Exception("Unable to create debug file");
             }
         }
         //--------------------------------------------------------------------------------
