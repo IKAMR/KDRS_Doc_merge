@@ -60,8 +60,8 @@ namespace binFileMerger
         private void InitDocMerge()
         {
             log.Clear();
-            textBox1.Text = "";
-            textBox2.Text = "";
+            textBox1.Text = "Start: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            textBox2.Text = textBox1.Text;
 
             targetFolder = txtTargetFolder.Text;
             string siardNameOutput = "siard_structure_output";
@@ -158,14 +158,15 @@ namespace binFileMerger
             Console.WriteLine("SIARD version: " + finder.SiardVersion);
             Console.WriteLine("Root lobFolder: " + finder.LobFolder);
             backgroundWorker1.ReportProgress(0, "\r\nSIARD version: " + finder.SiardVersion);
-            backgroundWorker1.ReportProgress(0, "\r\n\r\nTables:\r\n");
+            backgroundWorker1.ReportProgress(0, "\r\n\r\nTable parsing started: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm")  + "\r\n");
+            backgroundWorker1.ReportProgress(-2, "\r\n\r\nTable parsing started: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + "\r\n");
 
             foreach (SiardTableXml table in siardListe)
             {
                 doMergeFiles = false;
                 hasLob = false;
                 inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
-                backgroundWorker1.ReportProgress(-2, table.TableNameDb + " | " + table.TableNameDb);
+                backgroundWorker1.ReportProgress(-2, "\r\n" + table.TableNameDb + " | " + table.TableNameDb);
 
                 if (!String.IsNullOrEmpty(table.LobPath))
                 {
@@ -231,6 +232,7 @@ namespace binFileMerger
 
                         if (lobs.Count > 0)
                         {
+                            log.Add("filid;output;filref_or_inline");
                             backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + table.TableRows + " ?=? " + lobs.Count + " rows");
                             TableMerge(table.TableFileName);
                         }
@@ -260,9 +262,9 @@ namespace binFileMerger
             if (!String.IsNullOrEmpty(newSchemaName))
                 CheckSchemaName(newSchemaName);
 
-            backgroundWorker1.ReportProgress(-2, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+            backgroundWorker1.ReportProgress(0, "\r\n\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+            backgroundWorker1.ReportProgress(-2, "\r\n\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + "\r\n");
 
-            backgroundWorker1.ReportProgress(0, "\r\nTable parsing completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
             backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
             backgroundWorker1.ReportProgress(0, "\r\nLOB tables = " + countTableLob);
             backgroundWorker1.ReportProgress(0, "\r\nTotal number of tables = " + (countTableStd + countTableLob));
@@ -538,14 +540,21 @@ namespace binFileMerger
         private void BinMergeLob(List<Lob> lobsToMerge, string outFileName)
         {
             using (var outputStream = File.Create(outFileName))
-            {
+            {                
                 foreach (Lob lob in lobsToMerge)
                 {
+                    // string fileName = Path.Combine(Path.GetDirectoryName(outFileName), Path.GetFileName(outFileName));
+                    string fileName = Path.GetFileName(outFileName);
+                    string fileFolder1 = Path.GetFileName(Path.GetDirectoryName(outFileName));
+                    string fileFolder2 = Path.GetFileName(Path.GetDirectoryName(fileFolder1));
+                    //string fileFolder3 = Path.GetFileName(Path.GetDirectoryName(fileFolder2));
+                    //string fileFolder4 = Path.GetFileName(Path.GetDirectoryName(fileFolder3));
+
                     if (lob.LobType == "lob")
                     {
-                        // XML Inline Content LOB value
-                        // log.Add(lob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + lobs.Count + ";" + "oldSeg" + ";" + lob.LobString);
-                        log.Add(lob.FileId + ";" + outFileName + ";" + lob.LobString);
+                        // XML Inline Content LOB value                        
+                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes)");
+                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes)");
                         byte[] byteArray = Encoding.ASCII.GetBytes(lob.LobString);
                         using (var inputstream = new MemoryStream(byteArray))
                         {
@@ -555,8 +564,8 @@ namespace binFileMerger
                     else
                     {
                         // XML File Attribute file = filepath LOB
-                        // log.Add(lob.FileId + ";" + outFileName + ";" + "newSeg" + ";" + "droid" + ";" + lobs.Count + ";" + "oldSeg" + ";" + lob.LobString);
-                        log.Add(lob.FileId + ";" + outFileName + ";" + lob.LobString);
+                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString);
+                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString);
                         using (var inputStream = File.OpenRead(lob.LobPath))
                         {
                             inputStream.CopyTo(outputStream);
@@ -688,6 +697,7 @@ namespace binFileMerger
         public void MakeLogFile(string table)
         {
             File.WriteAllLines(Path.Combine(Directory.GetParent(siardFolderOutput).ToString(), "filelist_" + table + "_" + GetTimeStamp() + ".csv"), log);
+            log.Clear();
         }
         //--------------------------------------------------------------------------------
         // Resets the form.
