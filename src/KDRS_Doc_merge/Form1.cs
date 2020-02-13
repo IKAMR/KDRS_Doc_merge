@@ -232,7 +232,7 @@ namespace binFileMerger
 
                         if (lobs.Count > 0)
                         {
-                            log.Add("filid;output;filref_or_inline");
+                            log.Add("filid;output;filref_or_inline;size");
                             backgroundWorker1.ReportProgress(-2, "\r\nLOB table have " + table.TableRows + " ?=? " + lobs.Count + " rows");
                             TableMerge(table.TableFileName);
                         }
@@ -553,8 +553,9 @@ namespace binFileMerger
                     if (lob.LobType == "lob")
                     {
                         // XML Inline Content LOB value                        
-                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes)");
-                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes)");
+                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes);" + fileLength);
+                        // log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes);" + fileLength);
+                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML;" + lob.LobString.Length);
                         byte[] byteArray = Encoding.ASCII.GetBytes(lob.LobString);
                         using (var inputstream = new MemoryStream(byteArray))
                         {
@@ -564,8 +565,13 @@ namespace binFileMerger
                     else
                     {
                         // XML File Attribute file = filepath LOB
-                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString);
-                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString);
+
+                        FileInfo fi = new FileInfo(outFileName);
+                        long fileLength = fi.Length;
+                        // backgroundWorker1.ReportProgress(-2, "\r\n" + outFileName + ", size = " + fileLength);
+
+                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString + ";" + fileLength);
+                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString + ";" + fileLength);
                         using (var inputStream = File.OpenRead(lob.LobPath))
                         {
                             inputStream.CopyTo(outputStream);
