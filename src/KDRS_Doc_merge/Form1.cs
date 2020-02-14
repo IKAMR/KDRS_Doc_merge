@@ -189,7 +189,8 @@ namespace binFileMerger
                     {
                         Console.WriteLine("Match DGDOKLAGERn: " + table.TableNameDb);
                         backgroundWorker1.ReportProgress(-2, "\r\n  >>> LOB, Match DGDOKLAGERn: " + table.TableNameDb);
-                        doMergeFiles = true;
+                        if (table.TableRows > 0)
+                            doMergeFiles = true;
                     }
                     else
                     {
@@ -275,7 +276,7 @@ namespace binFileMerger
             backgroundWorker1.ReportProgress(-2, "\r\nmetadata.xml summarized number of rows (possibly sliced) = " + Globals.countTotalRowsMetadata);
             backgroundWorker1.ReportProgress(-2, "\r\nTotal number of files = " + Globals.countTotalFiles);
             backgroundWorker1.ReportProgress(-2, "\r\nTotal number of Inline XML (ca. < 1kB) = " + Globals.countTotalInlineXml);
-            backgroundWorker1.ReportProgress(-2, "\r\nTotal number of small files (ca. < 32 kB if sliced) = " + Globals.countTotalSmallFiles);
+            // backgroundWorker1.ReportProgress(-2, "\r\nTotal number of small files (ca. < 32 kB if sliced) = " + Globals.countTotalSmallFiles);
 
             if (chkBxMakeSiard.Checked)
             {
@@ -386,6 +387,7 @@ namespace binFileMerger
                     lobs.Add(new Lob(fileId, fileCount, lobSize, lobString[0], lobString[1], Path.Combine(lobRootPath, lobString[0]), lobPath));
                 }
                 rowCount++;
+                // Globals.countTotalRows++;
                 progress = rowCount * 100 / rowTotal;
                 backgroundWorker1.ReportProgress(progress);
             }
@@ -449,6 +451,7 @@ namespace binFileMerger
             int lobTotal = lobs.Count - 2;
             int progress = 0;
             int progressCount = 0;
+            int countInlineXml = 0;
 
             foreach (Lob lob in lobs.Skip(1))
             {
@@ -469,6 +472,7 @@ namespace binFileMerger
                         counter++;
 
                         // A single Inline XML file created
+                        countInlineXml++;
                         Globals.countTotalInlineXml++;
                         log.Add(lob.FileId + ";" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
                     }
@@ -563,7 +567,7 @@ namespace binFileMerger
             MakeLogFile(tableName);
 
             backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files");
-            backgroundWorker1.ReportProgress(-2, ", merged into " + counter + " files: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+            backgroundWorker1.ReportProgress(-2, ", merged into " + counter + " files, " + countInlineXml + " Inline XML: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
         }
         //--------------------------------------------------------------------------------
         // Merges contents of the input list to a file with name 'outFileName'.
@@ -949,7 +953,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.8 rc1";
+        public static readonly String toolVersion = "0.3.8";
 
         public static string textBox1_fixed = "";
         public static string textBox1_temp = "";
