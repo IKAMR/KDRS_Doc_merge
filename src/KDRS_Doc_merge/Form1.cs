@@ -166,7 +166,9 @@ namespace binFileMerger
                 doMergeFiles = false;
                 hasLob = false;
                 inputFileName = table.TableFilePath + @"\" + table.TableFileName + ".xml";
-                backgroundWorker1.ReportProgress(-2, "\r\n" + table.TableNameDb + " | " + table.TableNameDb + " | Start: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                backgroundWorker1.ReportProgress(-2, "\r\n" + table.TableFileName + " | " + table.TableNameDb + " | Start: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                Globals.countTotalRowsMetadata += table.TableRows;
+
 
                 if (!String.IsNullOrEmpty(table.LobPath))
                 {
@@ -268,6 +270,12 @@ namespace binFileMerger
             backgroundWorker1.ReportProgress(0, "\r\n\r\nStandard tables  = " + countTableStd);
             backgroundWorker1.ReportProgress(0, "\r\nLOB tables = " + countTableLob);
             backgroundWorker1.ReportProgress(0, "\r\nTotal number of tables = " + (countTableStd + countTableLob));
+
+            backgroundWorker1.ReportProgress(-2, "\r\nTotal number of rows (possibly sliced) = " + Globals.countTotalRows);
+            backgroundWorker1.ReportProgress(-2, "\r\nmetadata.xml summarized number of rows (possibly sliced) = " + Globals.countTotalRowsMetadata);
+            backgroundWorker1.ReportProgress(-2, "\r\nTotal number of files = " + Globals.countTotalFiles);
+            backgroundWorker1.ReportProgress(-2, "\r\nTotal number of Inline XML (ca. < 1kB) = " + Globals.countTotalInlineXml);
+            backgroundWorker1.ReportProgress(-2, "\r\nTotal number of small files (ca. < 32 kB if sliced) = " + Globals.countTotalSmallFiles);
 
             if (chkBxMakeSiard.Checked)
             {
@@ -426,8 +434,6 @@ namespace binFileMerger
 
             int fileCount = 0;
             string newFileName;
-            // int countFileInline = 0;
-            // int countFileLob = 0;
 
             List<Lob> mergeLobs = new List<Lob>();
 
@@ -446,7 +452,7 @@ namespace binFileMerger
 
             foreach (Lob lob in lobs.Skip(1))
             {
-
+                Globals.countTotalRows++;
                 fileID = lob.FileId;
 
                 if (fileID != prevFileID)
@@ -463,7 +469,7 @@ namespace binFileMerger
                         counter++;
 
                         // A single Inline XML file created
-                        // log.Add(lob.FileId + ";" + lob.LobFolder + "/" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
+                        Globals.countTotalInlineXml++;
                         log.Add(lob.FileId + ";" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
                     }
                     else
@@ -476,6 +482,7 @@ namespace binFileMerger
                         counter++;
 
                         // A LOB File merge completed
+                        Globals.countTotalFiles++;
                         FileInfo fi = new FileInfo(newFileName);
                         long fileLength = fi.Length;
 
@@ -510,6 +517,7 @@ namespace binFileMerger
                         // countFileInline++;
 
                         // A single Inline XML file created
+                        Globals.countTotalInlineXml++;
                         // log.Add(lob.FileId + ";" + lob.LobFolder + "/" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
                         log.Add(lob.FileId + ";" + lobFileName + ";" + lob.LobString.Length + ";" + "Inline Hex XML;");
                     }
@@ -525,14 +533,9 @@ namespace binFileMerger
                         // countFileLob++;
 
                         // A LOB File merge completed
+                        Globals.countTotalFiles++;
                         FileInfo fi = new FileInfo(newFileName);
                         long fileLength = fi.Length;
-
-                        // string fileName = Path.GetFileName(outFileName);
-                        // string fileFolder1 = Path.GetFileName(Path.GetDirectoryName(outFileName));
-                        // string fileFolder2 = Path.GetFileName(Path.GetDirectoryName(fileFolder1));
-                        //string fileFolder3 = Path.GetFileName(Path.GetDirectoryName(fileFolder2));
-                        //string fileFolder4 = Path.GetFileName(Path.GetDirectoryName(fileFolder3));
 
                         // backgroundWorker1.ReportProgress(-2, "\r\nFolder = " + lob.LobFolder + "\r\nFile = " + mergeLobs[0].LobString);
                         log.Add(lob.FileId + ";" + mergeLobs[0].LobString + ";" + fileLength + ";");                        
@@ -559,9 +562,7 @@ namespace binFileMerger
 
             MakeLogFile(tableName);
 
-            // backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files from " + prevFileCount + " rows");
             backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " files");
-            // backgroundWorker1.ReportProgress(progress, ", merged into " + counter + " (" + countFileInline + " from inline, " + countFileLob + " lob)");
             backgroundWorker1.ReportProgress(-2, ", merged into " + counter + " files: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
         }
         //--------------------------------------------------------------------------------
@@ -572,25 +573,9 @@ namespace binFileMerger
             {                
                 foreach (Lob lob in lobsToMerge)
                 {
-                    /*
-                    // string fileName = Path.Combine(Path.GetDirectoryName(outFileName), Path.GetFileName(outFileName));
-                    string fileName = Path.GetFileName(outFileName);
-                    string fileFolder1 = Path.GetFileName(Path.GetDirectoryName(outFileName));
-                    string fileFolder2 = Path.GetFileName(Path.GetDirectoryName(fileFolder1));
-                    //string fileFolder3 = Path.GetFileName(Path.GetDirectoryName(fileFolder2));
-                    //string fileFolder4 = Path.GetFileName(Path.GetDirectoryName(fileFolder3));
-                    */
-
                     if (lob.LobType == "lob")
                     {
                         // XML Inline Content LOB value                        
-
-                        /*
-                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes);" + fileLength);
-                        // log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML (" + lob.LobString.Length + " bytes);" + fileLength);
-                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + "Inline Hex XML;" + lob.LobString.Length);
-                        */
-
                         byte[] byteArray = Encoding.ASCII.GetBytes(lob.LobString);
                         using (var inputstream = new MemoryStream(byteArray))
                         {
@@ -600,16 +585,6 @@ namespace binFileMerger
                     else
                     {
                         // XML File Attribute file = filepath LOB
-
-                        /*
-                        FileInfo fi = new FileInfo(outFileName);
-                        long fileLength = fi.Length;
-                        // backgroundWorker1.ReportProgress(-2, "\r\n" + outFileName + ", size = " + fileLength);
-
-                        // log.Add(lob.FileId + ";" + fileFolder4 + "/" + fileFolder3 + "/" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString + ";" + fileLength);
-                        log.Add(lob.FileId + ";" + fileFolder2 + "/" + fileFolder1 + "/" + fileName + ";" + lob.LobString + ";" + fileLength);
-                        */
-
                         using (var inputStream = File.OpenRead(lob.LobPath))
                         {
                             inputStream.CopyTo(outputStream);
@@ -770,30 +745,6 @@ namespace binFileMerger
                 xmlWriter.Close();
         }
         #endregion
-        //--------------------------------------------------------------------------------
-        // Opens file dialog. Adds filenames to UI.
-        private void button2_Click(object sender, EventArgs e)
-        {
-            string initFileName;
-
-            DialogResult dr = openFileDialog1.ShowDialog();
-            if (dr == DialogResult.OK)
-            {
-                initFileName = openFileDialog1.FileName;
-
-                ReadInitFile(initFileName);
-            }
-
-            textBox1.Clear();
-
-            /* listBox1.Items.Clear();
-
-            listBox1.Items.Add("Source folder: " + sourceFolder);
-            listBox1.Items.Add("Destination folder: " + siardFolderOutput);
-            listBox1.Items.Add("metadata.xml: " + metadataXmlName);
-
-            listBox1.Items.Add(GetTimeStamp()); */
-        }
 
         //--------------------------------------------------------------------------------
         // Reads the init.txt file and assigns values to the parameters.
@@ -998,12 +949,16 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.7";
+        public static readonly String toolVersion = "0.3.8 rc1";
 
         public static string textBox1_fixed = "";
         public static string textBox1_temp = "";
 
-        public static int countFiles = 0;
+        public static long countTotalRows = 0;
+        public static long countTotalRowsMetadata = 0;
+        public static long countTotalFiles = 0;
+        public static long countTotalInlineXml = 0;
+        public static long countTotalSmallFiles = 0;
 
         // Test mode skips creating output files, just unpack .siard and counts
         public static bool testMode = false;
