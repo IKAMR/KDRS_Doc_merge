@@ -61,6 +61,7 @@ namespace binFileMerger
         {
             log.Clear();
             textBox1.Text = "Start: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            textBox1.AppendText("\r\n" + Globals.toolName + " v" + Globals.toolVersion);
             textBox2.Text = textBox1.Text;
 
             targetFolder = txtTargetFolder.Text;
@@ -88,6 +89,7 @@ namespace binFileMerger
                 {
                     FileInfo fi = new FileInfo(inputFileName);
                     textBox1.AppendText("\r\n\r\nSelected file: " + inputFileName);
+                    textBox1.AppendText("\r\nSelected target folder: " + targetFolder);
                     textBox1.AppendText("\r\nUnzipping .siard file, size " + fi.Length + " bytes (may take a while): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                     filesAdded = true;
 
@@ -104,7 +106,10 @@ namespace binFileMerger
             }
             else if (Path.GetFileName(inputFileName).Equals("metadata.xml"))
             {
-                textBox1.AppendText("\r\nReading unzipped metadata.xml");
+                FileInfo fi = new FileInfo(inputFileName);
+                textBox1.AppendText("\r\n\r\nSelected file: " + inputFileName);
+                textBox1.AppendText("\r\nSelected target folder: " + targetFolder);
+                textBox1.AppendText("\r\nReading metadata.xml");
                 filesAdded = true;
 
                 metadataXmlName = inputFileName;
@@ -970,7 +975,7 @@ namespace binFileMerger
     public static class Globals
     {
         public static readonly String toolName = "KDRS Doc merge";
-        public static readonly String toolVersion = "0.3.8";
+        public static readonly String toolVersion = "0.3.9";
 
         public static string textBox1_fixed = "";
         public static string textBox1_temp = "";
