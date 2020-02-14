@@ -76,11 +76,19 @@ namespace binFileMerger
             if (Globals.limitFilesMode)
                 textBox1.AppendText("\r\nLimits LOB table to " + Globals.limitFilesNumber +" files");
 
-            if (inputExt.Equals(".siard"))
+            if (!File.Exists(inputFileName))
+                textBox1.AppendText("\r\nAn existing input file .siard or metadata.xml is not selected");
+            else if (String.IsNullOrEmpty(targetFolder))
+                textBox1.AppendText("\r\nA target folder is not selected");
+            else if (chkBxMakeSiard.Checked && !File.Exists(zip64jar))
+                textBox1.AppendText("\r\nMake .siard needs zip64.jar file selected");
+            else if (inputExt.Equals(".siard"))
             {
                 if (File.Exists(zip64jar))
                 {
-                    textBox1.AppendText("\r\nUnzipping .siard file (may take a while): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                    FileInfo fi = new FileInfo(inputFileName);
+                    textBox1.AppendText("\r\n\r\nSelected file: " + inputFileName);
+                    textBox1.AppendText("\r\nUnzipping .siard file, size " + fi.Length + " bytes (may take a while): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
                     filesAdded = true;
 
                     string siardNameInput = "siard_structure_input";
@@ -96,7 +104,7 @@ namespace binFileMerger
             }
             else if (Path.GetFileName(inputFileName).Equals("metadata.xml"))
             {
-                textBox1.AppendText("\r\nReading unzipped metadata.xml");                
+                textBox1.AppendText("\r\nReading unzipped metadata.xml");
                 filesAdded = true;
 
                 metadataXmlName = inputFileName;
@@ -111,7 +119,7 @@ namespace binFileMerger
 
             if (filesAdded)
             {
-                textBox1.AppendText("\r\nStarting prosessing siard structure: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                textBox1.AppendText("\r\n\r\nStarting prosessing siard structure: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
 
                 if (!Globals.testMode)
                     Directory.CreateDirectory(siardFolderOutput);
@@ -282,7 +290,10 @@ namespace binFileMerger
             {
                 string targetFolderName = Path.GetFileName(targetFolder);
                 string zipName = Path.Combine(targetFolder, targetFolderName);
+                Globals.zipNameOutput = zipName + ".siard";
                 backgroundWorker1.ReportProgress(0, "\r\nCreating the .siard file (may take a while): " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                // backgroundWorker1.ReportProgress(0, "\r\n" + siardFolderOutput + ".siard");
+                backgroundWorker1.ReportProgress(0, "\r\n" + Globals.zipNameOutput);
 
                 zipper.SiardZip(siardFolderOutput, zipName, zip64jar);
             }
@@ -316,7 +327,13 @@ namespace binFileMerger
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             textBox1.AppendText("\r\n\r\nJob complete: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
-            textBox1.AppendText("\r\n\r\nTarget folder location: \r\n " + targetFolder);
+            textBox1.AppendText("\r\n\r\nTarget folder location: \r\n" + targetFolder + @"\");
+            if (chkBxMakeSiard.Checked)
+            {
+                FileInfo fi = new FileInfo(Globals.zipNameOutput);
+                textBox1.AppendText("\r\nSIARD file: " + Path.GetFileName(Globals.zipNameOutput) + " - size " + fi.Length + " bytes");
+                textBox1.AppendText("\r\n### END ###");
+            }
 
             // Save logfile
             string logFile = Path.Combine(targetFolder, "kdrs-doc-merge_log_" + DateTime.Now.ToString("yyyy-MM-dd-HHmm") + ".txt");
@@ -958,6 +975,7 @@ namespace binFileMerger
         public static string textBox1_fixed = "";
         public static string textBox1_temp = "";
 
+        public static string zipNameOutput = "";
         public static long countTotalRows = 0;
         public static long countTotalRowsMetadata = 0;
         public static long countTotalFiles = 0;

@@ -57,7 +57,7 @@
             this.Reset.Margin = new System.Windows.Forms.Padding(6);
             this.Reset.Name = "Reset";
             this.Reset.Size = new System.Drawing.Size(145, 98);
-            this.Reset.TabIndex = 7;
+            this.Reset.TabIndex = 11;
             this.Reset.Text = "Reset";
             this.Reset.UseVisualStyleBackColor = true;
             this.Reset.Click += new System.EventHandler(this.Reset_Click);
@@ -75,6 +75,7 @@
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox1.Size = new System.Drawing.Size(983, 405);
             this.textBox1.TabIndex = 6;
+            this.textBox1.TabStop = false;
             // 
             // btnRunMerge
             // 
@@ -82,7 +83,7 @@
             this.btnRunMerge.Margin = new System.Windows.Forms.Padding(6);
             this.btnRunMerge.Name = "btnRunMerge";
             this.btnRunMerge.Size = new System.Drawing.Size(301, 111);
-            this.btnRunMerge.TabIndex = 5;
+            this.btnRunMerge.TabIndex = 10;
             this.btnRunMerge.Text = "Merge files";
             this.btnRunMerge.UseVisualStyleBackColor = true;
             this.btnRunMerge.Click += new System.EventHandler(this.btnRunMerge_Click);
@@ -115,7 +116,7 @@
             this.txtInputFile.Margin = new System.Windows.Forms.Padding(6);
             this.txtInputFile.Name = "txtInputFile";
             this.txtInputFile.Size = new System.Drawing.Size(1139, 29);
-            this.txtInputFile.TabIndex = 10;
+            this.txtInputFile.TabIndex = 2;
             // 
             // btnInputFile
             // 
@@ -123,7 +124,7 @@
             this.btnInputFile.Margin = new System.Windows.Forms.Padding(4);
             this.btnInputFile.Name = "btnInputFile";
             this.btnInputFile.Size = new System.Drawing.Size(174, 68);
-            this.btnInputFile.TabIndex = 11;
+            this.btnInputFile.TabIndex = 1;
             this.btnInputFile.Text = "Choose input-file siard/metadata";
             this.btnInputFile.UseVisualStyleBackColor = true;
             this.btnInputFile.Click += new System.EventHandler(this.btnInputFile_Click);
@@ -134,7 +135,7 @@
             this.btnTargetFolder.Margin = new System.Windows.Forms.Padding(4);
             this.btnTargetFolder.Name = "btnTargetFolder";
             this.btnTargetFolder.Size = new System.Drawing.Size(174, 68);
-            this.btnTargetFolder.TabIndex = 12;
+            this.btnTargetFolder.TabIndex = 3;
             this.btnTargetFolder.Text = "Choose target folder";
             this.btnTargetFolder.UseVisualStyleBackColor = true;
             this.btnTargetFolder.Click += new System.EventHandler(this.btnTargetFolder_Click);
@@ -147,7 +148,7 @@
             this.txtTargetFolder.Margin = new System.Windows.Forms.Padding(6);
             this.txtTargetFolder.Name = "txtTargetFolder";
             this.txtTargetFolder.Size = new System.Drawing.Size(1139, 29);
-            this.txtTargetFolder.TabIndex = 13;
+            this.txtTargetFolder.TabIndex = 4;
             // 
             // chkBxMakeSiard
             // 
@@ -158,7 +159,7 @@
             this.chkBxMakeSiard.Margin = new System.Windows.Forms.Padding(6);
             this.chkBxMakeSiard.Name = "chkBxMakeSiard";
             this.chkBxMakeSiard.Size = new System.Drawing.Size(139, 29);
-            this.chkBxMakeSiard.TabIndex = 14;
+            this.chkBxMakeSiard.TabIndex = 6;
             this.chkBxMakeSiard.Text = "Make .siard";
             this.chkBxMakeSiard.UseVisualStyleBackColor = true;
             // 
@@ -170,7 +171,7 @@
             this.txtZip64Jar.Margin = new System.Windows.Forms.Padding(6);
             this.txtZip64Jar.Name = "txtZip64Jar";
             this.txtZip64Jar.Size = new System.Drawing.Size(978, 29);
-            this.txtZip64Jar.TabIndex = 15;
+            this.txtZip64Jar.TabIndex = 8;
             // 
             // btnZip64Jar
             // 
@@ -178,7 +179,7 @@
             this.btnZip64Jar.Margin = new System.Windows.Forms.Padding(4);
             this.btnZip64Jar.Name = "btnZip64Jar";
             this.btnZip64Jar.Size = new System.Drawing.Size(174, 44);
-            this.btnZip64Jar.TabIndex = 16;
+            this.btnZip64Jar.TabIndex = 7;
             this.btnZip64Jar.Text = "Choose zip64.jar";
             this.btnZip64Jar.UseVisualStyleBackColor = true;
             this.btnZip64Jar.Click += new System.EventHandler(this.btnZip64Jar_Click);
@@ -189,7 +190,7 @@
             this.btnTest.Margin = new System.Windows.Forms.Padding(6);
             this.btnTest.Name = "btnTest";
             this.btnTest.Size = new System.Drawing.Size(145, 98);
-            this.btnTest.TabIndex = 17;
+            this.btnTest.TabIndex = 12;
             this.btnTest.Text = "Test";
             this.btnTest.UseVisualStyleBackColor = true;
             this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
@@ -201,7 +202,7 @@
             this.chkBxFilesLimit.Margin = new System.Windows.Forms.Padding(6);
             this.chkBxFilesLimit.Name = "chkBxFilesLimit";
             this.chkBxFilesLimit.Size = new System.Drawing.Size(245, 29);
-            this.chkBxFilesLimit.TabIndex = 18;
+            this.chkBxFilesLimit.TabIndex = 9;
             this.chkBxFilesLimit.Text = "Limit to 500 files pr table";
             this.chkBxFilesLimit.UseVisualStyleBackColor = true;
             // 
@@ -213,7 +214,7 @@
             this.txtSchemaName.Margin = new System.Windows.Forms.Padding(6);
             this.txtSchemaName.Name = "txtSchemaName";
             this.txtSchemaName.Size = new System.Drawing.Size(398, 29);
-            this.txtSchemaName.TabIndex = 19;
+            this.txtSchemaName.TabIndex = 5;
             // 
             // label1
             // 
@@ -237,6 +238,7 @@
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox2.Size = new System.Drawing.Size(983, 177);
             this.textBox2.TabIndex = 21;
+            this.textBox2.TabStop = false;
             // 
             // label2
             // 
